@@ -14,9 +14,6 @@ def main():
     #displayTeam(teamB)
 
 
-
-
-
 def makeTeam():
     team = []
     for x in range(10):
@@ -25,9 +22,6 @@ def makeTeam():
         else:
             team.append(Pitcher.Pitcher("Mary Jane", 50, 50 ,50 ,50 ,50 ,50, ["Four Seamer", "Slider", "Changeup", "Curveball"]))
     return team
-
-
-
 
 def displayTeam(team):
     r =  ""
@@ -41,8 +35,6 @@ def displayTeam(team):
     
     print(r)
          
-
-
 def makeScoreboard(inning, outs, batter, pitcher):
     scoreboard ="""----------------------------------------------------------------------------------------------------------------------
 |                                                                                                                    |

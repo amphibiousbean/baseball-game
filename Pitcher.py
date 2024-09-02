@@ -12,7 +12,7 @@ class Pitcher:
         self.pitches = pitches
     
     def print(self):
-        r = "Name : " + str(self.name) +  "\nVelocity :  " + str(self.velo) + "\nK/9 : " + str(self.K_rate) + "\nBB/9 : " + str(self.BB_rate) + "\nHR/9 : " + str(self.HR_rate) + "\nH/9 : " + str(self.H_rate) + "\nControl : " + str(self.control)
+        r = str(self.name) +  "\nVelocity : " + str(self.velo) + "\nK/9 : " + str(self.K_rate) + "\nBB/9 : " + str(self.BB_rate) + "\nHR/9 : " + str(self.HR_rate) + "\nH/9 : " + str(self.H_rate) + "\nControl : " + str(self.control)
         pitches_str = "\n"
         count = 0
         for pitch in self.pitches:
@@ -21,8 +21,8 @@ class Pitcher:
         r += pitches_str
         print(r)
     
-    def toString(self):
-        r = "Name : " + str(self.name) +  "\nVelocity :  " + str(self.velo) + "\nK/9 : " + str(self.K_rate) + "\nBB/9 : " + str(self.BB_rate) + "\nHR/9 : " + str(self.HR_rate) + "\nH/9 : " + str(self.H_rate) + "\nControl : " + str(self.control)
+    def str(self):
+        r = str(self.name) +  "\nVelocity :  " + str(self.velo) + "\nK/9 : " + str(self.K_rate) + "\nBB/9 : " + str(self.BB_rate) + "\nHR/9 : " + str(self.HR_rate) + "\nH/9 : " + str(self.H_rate) + "\nControl : " + str(self.control)
         pitches_str = "\n"
         count = 0
         for pitch in self.pitches:

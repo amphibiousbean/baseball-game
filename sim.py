@@ -11,7 +11,8 @@ def main():
     displayScore()
     home_team = Team.Team("Phillies")
     away_team = Team.Team("Red Sox")
-    displayTeamDetails(home_team)
+    print(home_team.strBasic())
+    #displayTeamDetails(home_team)
     #displayTeam(away_team)
 
 

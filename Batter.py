@@ -1,15 +1,4 @@
 class Batter:
-    count_ratios = { #alters probabilities based on current count
-        "0-0" : 1.0,
-        "1-0" : 1.05,
-        "2-0" : 1.15,
-        "3-0" : 1.0,
-        "3-1" : 1.4,
-        "3-2" : .9,
-        "2-2" : .7,
-        "1-2" : .6,
-        "0-2" : .3
-    }
     #name : their name
     #pow : ability to hit for power
     #con : ability to make solid contact
@@ -31,7 +20,7 @@ class Batter:
         r = str(self.name) +  "\nPower :  " + str(self.pow) + "\nContact : " + str(self.con) + "\nVision : " + str(self.vis) + "\nDiscipline : " + str(self.disc)
         return r
 
-    def get_swing_prob(self, average_dict, pitch, count): #gets probability that batter will swing at a pitch
+    def get_swing_prob(self, pitch): #gets probability that batter will swing at a pitch
         if pitch.strike:
             prob = 1-(pitch.quality/(self.vis/50))
         else:

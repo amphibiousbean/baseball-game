@@ -9,6 +9,7 @@ class Team:
         self.starter = self.makeStarter()
         self.bench = self.makeBench()
         self.bullpen = self.makeBullpen()
+        self.upnext = 0 #current spot in lineup
 
 
     def makeLineup(self):
@@ -28,6 +29,11 @@ class Team:
         
         return bench
 
+    def next_spot(self): #next spot in the batting order. called after an at bat
+        if self.upnext < 8: 
+            self.upnext+=1
+        else:
+            self.upnext=0
 
     def makeStarter(self):
       

@@ -1,10 +1,17 @@
 import Pitcher as Pitcher
 import Batter as Batter
 import Team as Team
+import display as display
 
 home_runs_by_inning = [1,0,2,0]
 away_runs_by_inning = [1,1,0,0]
 game_loop = True
+averages_dict = {
+     "k_percent" : 0.2106,
+     "bb_percent" : 0.087,
+     "whiff_percent" : 0.2405,
+     "swing_percent" : 0.4787
+}
 
 def main():
 

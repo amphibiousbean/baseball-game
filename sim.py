@@ -65,11 +65,11 @@ def startGame(teamA, teamB):
             time.sleep(1)
         
         if inning % 1 == 0:
-            print(f"Top of the {get_ordinal(int(inning))} inning\n----------------------------------------")
+            print(f"Top of the {get_suffix(int(inning))} inning\n----------------------------------------")
             sim_half_inning(teamA, teamB)
             inning+=0.5
         else: 
-            print(f"Bottom of the {get_ordinal(int(inning))} inning\n----------------------------------------")
+            print(f"Bottom of the {get_suffix(int(inning))} inning\n----------------------------------------")
             sim_half_inning(teamB,teamA)
             inning+=0.5
         
@@ -78,35 +78,50 @@ def startGame(teamA, teamB):
         
 
 
-def sim_half_inning(pitching, batting): 
-
+def sim_half_inning(pitching, batting): #returns outcome of inning as a tuple :
+                                        #(runs, hits, walks) gets added to batting team
     inning_state = {
         "outs" : 0,
-        "bases" : {
-            "first" : 0,
-            "second" : 0,
-            "third" : 0
-        },
-        "runs_scored" : 0
+        "bases" : [0,0,0],
+        "runs_scored" : 0,
+        "hits" : 0,
+        "walks" : 0
     }
 
     outs=0
+    pitcher=pitching.starter
     while inning_state["outs"] < 3:
-        inning_state["outs"] += outs
-        outs+=1
-        print("Out " + str(outs))
-        time.sleep(0.3)
-        
+        input("Press ENTER to continue inning")
+        batter=batting.lineup[batting.upnext]
+        outcome = sim_AB(pitcher, batter)
+
     print("inning over!")
 
 
+#returns outcome of AB as tuple (outcome, advance_fact)
+# #advance_fact = advancing factor, how well a runner
+#               could take extra bases ie: 1st to 3rd on a single
+#advance factor <= 0.4 = no attempt to advance
+#0.4 < advance factor <= 0.6 attempt to advance, contested
+#advance factor > 0.6 = always advances, no contest
 def sim_AB(pitcher, batter):
+    count=(0,0)           #(balls, strikes)
+    while count[0] < 4 or count[1] < 3:
+
+        print("TEST")        
+        pitcher.print()          
+        batter.print()           
+        print("END TEST")        
+    return None               
+
+def sim_action(batter, pitcher): #returns outcome of action
     return None
-def sim_action(batter, pitcher):
+
+def update_inning_state(outcome, inning_state): #takes outcome tuple and updates inning_state
     return None
 
 
-def get_ordinal(n): #getting the "st", "nd", "rd", "th" for the inning
+def get_suffix(n): #getting the "st", "nd", "rd", "th" for the inning
     if 10 <= n % 100 <= 20: 
         suffix = "th"
     else:

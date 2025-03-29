@@ -10,6 +10,9 @@ def __init__(self, strike, quality, type, velo):
     self.velo=velo #double edged sword. batters are much less likely to make "good" contact
                    #but when good contact is made, it is trouble!
 
+
+
+
 def print(self):
     if(self.strike):
         print("Strike | " + str(self.type) + " " + str(self.velo) + "MPH")

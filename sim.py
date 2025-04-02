@@ -3,6 +3,7 @@ import Batter as Batter
 import Team as Team
 import display as display
 import time
+import random
 
 home_runs_by_inning = [1,0,2,0]
 away_runs_by_inning = [1,1,0,0]
@@ -24,12 +25,24 @@ count_ratios = { #alters probabilities based on current count
         "1-2" : .6,
         "0-2" : .3
     }
+outcomes_dict={
+    "whiff" : None,
+    "strike" : None,
+    "ball" : None,
+    "foul" : None,
+    "out" : None,
+    "single" : None,
+    "double" : None,
+    "triple" : None,
+    "home run" : None
+}
 def main():
 
     #displayScore()
     home_team = Team.Team("Phillies")
     away_team = Team.Team("Red Sox")
-    startGame(home_team, away_team)
+    sim_half_inning(home_team,away_team)
+    #startGame(home_team, away_team)
     
 team_a_runs = 1 #set to 1 for testing
 team_b_runs = 0
@@ -88,12 +101,14 @@ def sim_half_inning(pitching, batting): #returns outcome of inning as a tuple :
         "walks" : 0
     }
 
-    outs=0
     pitcher=pitching.starter
     while inning_state["outs"] < 3:
         input("Press ENTER to continue inning")
         batter=batting.lineup[batting.upnext]
         outcome = sim_AB(pitcher, batter)
+        inning_state=update_inning_state(outcome, inning_state)
+        print("Outs : " + str(inning_state["outs"]) + " Hits : " + str(inning_state["hits"]) + " Walks : " + str(inning_state["walks"]))
+
 
     print("inning over!")
 
@@ -106,19 +121,85 @@ def sim_half_inning(pitching, batting): #returns outcome of inning as a tuple :
 #advance factor > 0.6 = always advances, no contest
 def sim_AB(pitcher, batter):
     count=(0,0)           #(balls, strikes)
-    while count[0] < 4 or count[1] < 3:
+    while count[0] < 4 and count[1] < 3:
+        print_count(count)
+        time.sleep(1)
+        pitch=pitcher.make_pitch()
+        action_outcome=sim_action(batter, pitch) #returns a string which is a key in outcomes_dict
+        match action_outcome:
+            case "whiff" | "strike":
+                count=(count[0],count[1]+1)
+            case "foul" if count[1] < 2:
+                count=(count[0],count[1]+1)
+            case "ball":
+                count=(count[0]+1, count[1])
+            case "out":
+                return("out",0)
+            case "single":
+                return("single", 1)
+            case "double":
+                return("double", 2)
+            case "triple":
+                return ("triple", 3)
+            case "home run":
+                return("home run", 4)
+            
+    if count[0]==4:
+        print_count(count)
+        print("Walk")
+        return ("walk",1)
+    elif count[1]==3:
+        print_count(count)
+        print("Strikeout")
+        return("strikeout",0)   
+    else:    
+        return("ERROR",-1)
 
-        print("TEST")        
-        pitcher.print()          
-        batter.print()           
-        print("END TEST")        
-    return None               
+def sim_action(batter, pitch): #returns outcome of batter dependent actions (swing, strike, contact, foul, hit)
+    swing_prob=batter.get_swing_prob(pitch)
+    swing_rand=random.random()
 
-def sim_action(batter, pitcher): #returns outcome of action
-    return None
+    if swing_rand<=swing_prob: #if batter swings
 
-def update_inning_state(outcome, inning_state): #takes outcome tuple and updates inning_state
-    return None
+        outcome=batter.swing_outcome(pitch) #tuple (contact, foul, hit)
+
+        if outcome[0]: #if any contact
+            if outcome[1]: #if contact is a foul ball
+                return "foul"
+            elif outcome[2]: #if its a hit
+                return batter.get_hit(pitch)
+            else: #hit into an out
+                return "out"
+            
+        else: #swing and miss
+            return "whiff"  
+        
+    else: #no swing
+        if pitch[3]:#if strike
+            return "strike"
+        else:
+            return "ball"
+    
+
+def update_inning_state(outcome, inning_state): #takes outcome tuple and returns an updated inning_state
+    new_state=inning_state
+    match outcome[0]:
+        case "out" | "strikeout":
+            new_state["outs"] += 1
+        case "hit":
+            new_state["hits"] += 1
+        case "walk":
+            new_state["walks"] += 1
+    
+    return new_state
+        
+
+
+    
+    
+
+def print_count(count):
+    print(str(count[0])+"-"+str(count[1]))
 
 
 def get_suffix(n): #getting the "st", "nd", "rd", "th" for the inning

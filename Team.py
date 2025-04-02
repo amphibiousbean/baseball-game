@@ -39,11 +39,11 @@ class Team:
 
     def makeStarter(self):
       
-        return Pitcher.Pitcher("Mary Jane", 50, 50 ,50 ,50 ,50 ,50, {"Four Seamer" : 50, "Slider" : 50, "Changeup" : 50, "Curveball" : 50})
+        return Pitcher.Pitcher("Mary Jane", 50, 50 ,50 ,50 ,50 ,50, {"Fastball" : 50, "Slider" : 50, "Changeup" : 50, "Curveball" : 50})
     
     def makeBullpen(self):
         bullpen = []
-        bullpen.append(Pitcher.Pitcher("Jane Doe", 40, 40, 40, 40, 40, 40, {"Four Seamer" : 50, "Slider" : 50, "Sinker" : 50}))
+        bullpen.append(Pitcher.Pitcher("Jane Doe", 40, 40, 40, 40, 40, 40, {"Fastball" : 50, "Slider" : 50, "Sinker" : 50}))
         return bullpen
     
     def strDetailed(self):

@@ -21,8 +21,14 @@ class Batter:
         return r
 
     def get_swing_prob(self, pitch): #gets probability that batter will swing at a pitch
-        if pitch.strike:
-            prob = 1-(pitch.quality/(self.vis/50))
+        if pitch[3]:
+            prob = 1-(pitch[2]/(self.vis/50))
         else:
-            prob = pitch.quality/(self.disc/50)
+            prob = pitch[2]/(self.disc/50)
         return prob
+    
+    def swing_outcome(self, pitch): #returns result of a swing as tuple (contact, foul, hit)
+        return (False, False, False) #TEMP
+
+    def swing(self, pitch):
+        pass

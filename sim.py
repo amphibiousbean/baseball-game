@@ -2,6 +2,7 @@ import Pitcher as Pitcher
 import Batter as Batter
 import Team as Team
 import display as display
+import bases as bases
 import time
 import random
 
@@ -62,6 +63,7 @@ def startGame(teamA, teamB):
             
 #GAME LOOP START---------------------------------------------------------------------------------------------
     inning=0
+    bases=bases.bases()
     while game_loop:
         
 
@@ -95,7 +97,6 @@ def sim_half_inning(pitching, batting): #returns outcome of inning as a tuple :
                                         #(runs, hits, walks) gets added to batting team
     inning_state = {
         "outs" : 0,
-        "bases" : [0,0,0],
         "runs_scored" : 0,
         "hits" : 0,
         "walks" : 0
@@ -106,10 +107,10 @@ def sim_half_inning(pitching, batting): #returns outcome of inning as a tuple :
         input("Press ENTER to continue inning")
         batter=batting.lineup[batting.upnext]
         outcome = sim_AB(pitcher, batter)
-        inning_state=update_inning_state(outcome, inning_state)
+        inning_state=update_inning_state(batter,outcome, inning_state)
         print("Outs : " + str(inning_state["outs"]) + " Hits : " + str(inning_state["hits"]) + " Walks : " + str(inning_state["walks"]))
 
-
+    bases.flush()
     print("inning over!")
 
 
@@ -181,15 +182,17 @@ def sim_action(batter, pitch): #returns outcome of batter dependent actions (swi
             return "ball"
     
 
-def update_inning_state(outcome, inning_state): #takes outcome tuple and returns an updated inning_state
+def update_inning_state(batter, outcome, inning_state): #takes outcome tuple and returns an updated inning_state
     new_state=inning_state
-    match outcome[0]:
+    match outcome[0]:       #FUTURE : make inning state a class that can be changed and flushed, no more creation of new structures
         case "out" | "strikeout":
             new_state["outs"] += 1
         case "hit":
             new_state["hits"] += 1
+            new_state["runs_scored"] = bases.update_hit(outcome[1], batter)
         case "walk":
             new_state["walks"] += 1
+            new_state["runs_scored"]=bases.update_walk(batter)
     
     return new_state
         
@@ -208,6 +211,7 @@ def get_suffix(n): #getting the "st", "nd", "rd", "th" for the inning
     else:
         suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
     return f"{n}{suffix}"
+
 
 def makeScoreboard(inning, outs, batter, pitcher):
     

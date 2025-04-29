@@ -36,22 +36,25 @@ class bases:
     #pops end element off, returns what it was, adds the next element
     def enqueue_hit(self, next):
         popped=self.runners.pop()
-        self.runners.appendleft(next)
+        self.runners.appendleft(next.name)
         print(str(self.runners))
         return popped
     
     def enqueue_walk(self, batter): #returns None if no
-        if not self.runner[0]: #1st open
-            self.runner[0] = batter
+        if not self.runners[0]: #1st open
+            self.runners[0] = batter.name
             return None
-        elif not self.runner[1]: #1st+3rd, 1st [x, None, y] -> [z, x, y], [x,None,None] -> [z,x,None]
-            self.runner[1]=self.runner[0]
-            self.runner[0]=batter
+        elif not self.runners[1]: #1st+3rd, 1st [x, None, y] -> [z, x, y], [x,None,None] -> [z,x,None]
+            self.runners[1]=self.runners[0]
+            self.runners[0]=batter.name
             return None
         else: #1st+2nd, bases loaded
             popped=self.runners.pop()
-            self.runners.appendleft(next)
+            self.runners.appendleft(batter.name)
             return popped
+
+    def print(self):
+        print(str(self.runners))
 
     def flush(self): #clears bases for a new inning
         self.runners=collections.deque([None]*3)

@@ -2,7 +2,7 @@ import Pitcher as Pitcher
 import Batter as Batter
 import Team as Team
 import display as display
-import bases as bases
+import bases as b
 import time
 import random
 
@@ -47,6 +47,7 @@ def main():
     
 team_a_runs = 1 #set to 1 for testing
 team_b_runs = 0
+bases=b.bases(None)
 
 def startGame(teamA, teamB):
     
@@ -63,7 +64,6 @@ def startGame(teamA, teamB):
             
 #GAME LOOP START---------------------------------------------------------------------------------------------
     inning=0
-    bases=bases.bases()
     while game_loop:
         
 
@@ -105,6 +105,7 @@ def sim_half_inning(pitching, batting): #returns outcome of inning as a tuple :
     pitcher=pitching.starter
     inning_pitch_count=0
     while inning_state["outs"] < 3:
+        bases.print()
         input("Press ENTER to continue inning")
         batter=batting.lineup[batting.upnext]
         outcome = sim_AB(pitcher, batter)
@@ -153,11 +154,12 @@ def sim_AB(pitcher, batter):
     if count[0]==4:
         print_count(count)
         print("Walk")
-        return ("walk",1)
+        
+        return ("walk",1,AB_pitch_count)
     elif count[1]==3:
         print_count(count)
         print("Strikeout")
-        return("strikeout",0)   
+        return("strikeout",0,AB_pitch_count)   
     else:    
         return("ERROR",-1)
 

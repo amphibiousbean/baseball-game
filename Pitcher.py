@@ -24,12 +24,11 @@ class Pitcher:
     
     def make_pitch(self):
         #type_ind=random.randin(0,len(self.pitches))
-        k=0.062 #to smooth out the velo scaling
-        type_out=random.randint(0,len(self.pitches))
+        type_out=list(self.pitches.keys())[random.randint(0,len(self.pitches)-1)]
         velo_out=self.get_velo(type_out)
         quality=self.get_quality(type_out,velo_out)
         strike=self.get_strike()
-        print(type_out + " | " + str(velo_out))
+        print(type_out + " | " + str(round(velo_out,1)))
         self.pitch_count+=1
         return (type_out, velo_out, quality, strike)
 
@@ -53,12 +52,13 @@ class Pitcher:
         return strike
 
     def get_velo(self, pitch_type): #gets the velo of the pitch, between 2 under and 2 above the pitcher's average
+        k=0.062 #to smooth out the velo scaling
         average_vel=self.avg_velos[pitch_type]
         velo_out_avg=(average_vel + (((self.velo/50)*average_vel)-average_vel)/(1+k*((self.velo/50)*average_vel)-average_vel))*(1-self.fatigue)
         return random.uniform(velo_out_avg-2,velo_out_avg+2)
 
     def get_quality(self, pitch_type, pitch_velo):
-        pass
+        return (self.pitches[pitch_type]/50)*0.5 #NOT FINAL EQUATION
 
     def print(self):
         r = str(self.name) +  "\nVelocity : " + str(self.velo) + "\nK/9 : " + str(self.K_rate) + "\nBB/9 : " + str(self.BB_rate) + "\nHR/9 : " + str(self.HR_rate) + "\nH/9 : " + str(self.H_rate) + "\nControl : " + str(self.control)

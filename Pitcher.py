@@ -20,31 +20,45 @@ class Pitcher:
         self.pitches = pitches #dictionary key:pitch type : value : pitch "stuff"
         self.fatigue = 0
         self.pitch_count=0
-        self.confidence=0 #pitching well improves confidence, pitching poorly reduces confidence. max of 0.2
+        self.confidence=0 #pitching well improves confidence, pitching poorly reduces confidence. max increase/decrease = 0.2
     
     def make_pitch(self):
         #type_ind=random.randin(0,len(self.pitches))
         k=0.062 #to smooth out the velo scaling
-        type_out="Fastball" #hard coding fastballs... for now
-        average_vel=self.avg_velos[type_out]
-        velo_out=(average_vel + (((self.velo/50)*average_vel)-average_vel)/(1+k*((self.velo/50)*average_vel)-average_vel))*(1-self.fatigue)
-        quality= (self.pitches[type_out]/50)*0.5 #NOT FINAL EQUATION
+        type_out=random.randint(0,len(self.pitches))
+        velo_out=self.get_velo(type_out)
+        quality=self.get_quality(type_out,velo_out)
+        strike=self.get_strike()
+        print(type_out + " | " + str(velo_out))
+        self.pitch_count+=1
+        return (type_out, velo_out, quality, strike)
+
+    def add_fatigue(self, n): #adds fatigue to pitcher based on how many pitches were thrown in their last inning
+        self.pitch_count+=n
+        pitch_count_fatigue=self.pitch_count/2500
+        per_inning_fatigue=((n-15)/1000)
+        if self.pitch_count<=80:
+            self.fatigue+=per_inning_fatigue #gains energy after quick innings (less than 15 pitches), loses for longer innings
+        else:
+            self.fatigue+=(pitch_count_fatigue+per_inning_fatigue)
+    
+    def get_strike(self):
         strike_chance = ((self.control+self.confidence)/(50-(self.confidence/2)))*0.5  #50% chance by default, adjusted based on control attribute and confidence level
         strike_rand = random.random()
         strike=True
 
         if strike_rand > strike_chance:
             strike=False
-            print(type_out + " | " + str(velo_out))
-        else:
-            print(type_out + " | " + str(velo_out))
 
-        self.pitch_count+=1
-        return (type_out, velo_out, quality, strike)
+        return strike
 
-    def add_fatigue(self, n): #adds fatigue to pitcher based on how many pitches were thrown in their last inning
+    def get_velo(self, pitch_type): #gets the velo of the pitch, between 2 under and 2 above the pitcher's average
+        average_vel=self.avg_velos[pitch_type]
+        velo_out_avg=(average_vel + (((self.velo/50)*average_vel)-average_vel)/(1+k*((self.velo/50)*average_vel)-average_vel))*(1-self.fatigue)
+        return random.uniform(velo_out_avg-2,velo_out_avg+2)
+
+    def get_quality(self, pitch_type, pitch_velo):
         pass
-
 
     def print(self):
         r = str(self.name) +  "\nVelocity : " + str(self.velo) + "\nK/9 : " + str(self.K_rate) + "\nBB/9 : " + str(self.BB_rate) + "\nHR/9 : " + str(self.HR_rate) + "\nH/9 : " + str(self.H_rate) + "\nControl : " + str(self.control)

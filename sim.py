@@ -103,13 +103,16 @@ def sim_half_inning(pitching, batting): #returns outcome of inning as a tuple :
     }
 
     pitcher=pitching.starter
+    inning_pitch_count=0
     while inning_state["outs"] < 3:
         input("Press ENTER to continue inning")
         batter=batting.lineup[batting.upnext]
         outcome = sim_AB(pitcher, batter)
         inning_state=update_inning_state(batter,outcome, inning_state)
+        inning_pitch_count+=outcome[2]
         print("Outs : " + str(inning_state["outs"]) + " Hits : " + str(inning_state["hits"]) + " Walks : " + str(inning_state["walks"]))
 
+    pitcher.add_fatigue(inning_pitch_count)
     bases.flush()
     print("inning over!")
 
@@ -122,11 +125,13 @@ def sim_half_inning(pitching, batting): #returns outcome of inning as a tuple :
 #advance factor > 0.6 = always advances, no contest
 def sim_AB(pitcher, batter):
     count=(0,0)           #(balls, strikes)
+    AB_pitch_count=0
     while count[0] < 4 and count[1] < 3:
         print_count(count)
         time.sleep(1)
         pitch=pitcher.make_pitch()
         action_outcome=sim_action(batter, pitch) #returns a string which is a key in outcomes_dict
+        AB_pitch_count+=1
         match action_outcome:
             case "whiff" | "strike":
                 count=(count[0],count[1]+1)
@@ -135,15 +140,15 @@ def sim_AB(pitcher, batter):
             case "ball":
                 count=(count[0]+1, count[1])
             case "out":
-                return("out",0)
+                return("out",0,AB_pitch_count)
             case "single":
-                return("single", 1)
+                return("single", 1,AB_pitch_count)
             case "double":
-                return("double", 2)
+                return("double", 2,AB_pitch_count)
             case "triple":
-                return ("triple", 3)
+                return ("triple", 3,AB_pitch_count)
             case "home run":
-                return("home run", 4)
+                return("home run", 4,AB_pitch_count)
             
     if count[0]==4:
         print_count(count)
@@ -196,10 +201,6 @@ def update_inning_state(batter, outcome, inning_state): #takes outcome tuple and
     
     return new_state
         
-
-
-    
-    
 
 def print_count(count):
     print(str(count[0])+"-"+str(count[1]))

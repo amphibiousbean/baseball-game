@@ -1,6 +1,7 @@
 import Team as Team
 import Pitcher as Pitcher
 import Batter as Batter
+import scoreboard as scoreboard
 
 home_runs_by_inning = [1,0,2,0]
 away_runs_by_inning = [1,1,0,0]

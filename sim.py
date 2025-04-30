@@ -3,6 +3,7 @@ import Batter as Batter
 import Team as Team
 import display as display
 import bases as b
+import inning as inning
 import time
 import random
 
@@ -37,17 +38,21 @@ outcomes_dict={
     "triple" : None,
     "home run" : None
 }
+bases=b.bases(None)
+inning_state=inning.inning()
+
 def main():
 
     #displayScore()
     home_team = Team.Team("Phillies")
     away_team = Team.Team("Red Sox")
     sim_half_inning(home_team,away_team)
+    inning_state.print()
+    bases.print()
     #startGame(home_team, away_team)
     
 team_a_runs = 1 #set to 1 for testing
 team_b_runs = 0
-bases=b.bases(None)
 
 def startGame(teamA, teamB):
     
@@ -95,26 +100,22 @@ def startGame(teamA, teamB):
 
 def sim_half_inning(pitching, batting): #returns outcome of inning as a tuple :
                                         #(runs, hits, walks) gets added to batting team
-    inning_state = {
-        "outs" : 0,
-        "runs_scored" : 0,
-        "hits" : 0,
-        "walks" : 0
-    }
+    
 
     pitcher=pitching.starter
     inning_pitch_count=0
-    while inning_state["outs"] < 3:
+    while inning_state.outs < 3:
         bases.print()
         input("Press ENTER to continue inning")
         batter=batting.lineup[batting.upnext]
         outcome = sim_AB(pitcher, batter)
-        inning_state=update_inning_state(batter,outcome, inning_state)
+        update_inning_state(batter,outcome)
         inning_pitch_count+=outcome[2]
-        print("Outs : " + str(inning_state["outs"]) + " Hits : " + str(inning_state["hits"]) + " Walks : " + str(inning_state["walks"]))
+        inning_state.print()
 
     pitcher.add_fatigue(inning_pitch_count)
     bases.flush()
+    inning_state.flush()
     print("inning over!")
 
 
@@ -131,7 +132,7 @@ def sim_AB(pitcher, batter):
         print_count(count)
         time.sleep(1)
         pitch=pitcher.make_pitch()
-        action_outcome=sim_action(batter, pitch) #returns a string which is a key in outcomes_dict
+        action_outcome=batter.get_swing(pitch) #returns a string which is a key in outcomes_dict
         AB_pitch_count+=1
         match action_outcome:
             case "whiff" | "strike":
@@ -163,45 +164,20 @@ def sim_AB(pitcher, batter):
     else:    
         return("ERROR",-1)
 
-def sim_action(batter, pitch): #returns outcome of batter dependent actions (swing, strike, contact, foul, hit)
-    swing_prob=batter.get_swing_prob(pitch)
-    swing_rand=random.random()
-
-    if swing_rand<=swing_prob: #if batter swings
-
-        outcome=batter.swing_outcome(pitch) #tuple (contact, foul, hit)
-
-        if outcome[0]: #if any contact
-            if outcome[1]: #if contact is a foul ball
-                return "foul"
-            elif outcome[2]: #if its a hit
-                return batter.get_hit(pitch)
-            else: #hit into an out
-                return "out"
-            
-        else: #swing and miss
-            return "whiff"  
-        
-    else: #no swing
-        if pitch[3]:#if strike
-            return "strike"
-        else:
-            return "ball"
     
 
-def update_inning_state(batter, outcome, inning_state): #takes outcome tuple and returns an updated inning_state
-    new_state=inning_state
-    match outcome[0]:       #FUTURE : make inning state a class that can be changed and flushed, no more creation of new structures
+def update_inning_state(batter, outcome): #takes outcome tuple and updates inning_state
+    match outcome[0]:      
         case "out" | "strikeout":
-            new_state["outs"] += 1
+            inning_state.add_outs(1)
         case "hit":
-            new_state["hits"] += 1
-            new_state["runs_scored"] = bases.update_hit(outcome[1], batter)
+            inning_state.add_hit()
+            inning_state.add_runs(bases.update_hit(outcome[1], batter))
         case "walk":
-            new_state["walks"] += 1
-            new_state["runs_scored"]=bases.update_walk(batter)
+            inning_state.add_walk()
+            inning_state.add_runs(bases.update_walk(batter))
     
-    return new_state
+    
         
 
 def print_count(count):

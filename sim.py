@@ -1,14 +1,13 @@
 import Pitcher as Pitcher
 import Batter as Batter
 import Team as Team
-import display as display
+# import display as display
+import scoreboard as scoreboard
 import bases as b
 import inning as inning
 import time
 import random
 
-home_runs_by_inning = [1,0,2,0]
-away_runs_by_inning = [1,1,0,0]
 game_loop = False
 averages_dict = {
      "k_percent" : 0.2106,
@@ -38,21 +37,25 @@ outcomes_dict={
     "triple" : None,
     "home run" : None
 }
+display = "{:>6}".format("") + "1  2  3  4  5  6  7  8  9  T  H\n"
+away="{:>3}".format("BOS")
+home="{:>3}".format("PHI")
 bases=b.bases(None)
 inning_state=inning.inning()
+away_score=scoreboard.scoreboard()
+home_score=scoreboard.scoreboard()
 
 def main():
 
     #displayScore()
     home_team = Team.Team("Phillies")
     away_team = Team.Team("Red Sox")
-    sim_half_inning(home_team,away_team)
-    inning_state.print()
-    bases.print()
-    #startGame(home_team, away_team)
+    #sim_half_inning(home_team,away_team,away_score)
+    #print_display()
+    #inning_state.print()
+    #bases.print()
+    startGame(home_team, away_team)
     
-team_a_runs = 1 #set to 1 for testing
-team_b_runs = 0
 
 def startGame(teamA, teamB):
     
@@ -71,10 +74,9 @@ def startGame(teamA, teamB):
     inning=0
     while game_loop:
         
-
-        if inning == 9.5 and team_a_runs > team_b_runs:
+        if inning == 9.5 and home_score.runs > away_score.runs:
             print("FINAL")
-            displayScore()
+            print_display()
             return
 
         if inning==0:
@@ -86,11 +88,17 @@ def startGame(teamA, teamB):
         
         if inning % 1 == 0:
             print(f"Top of the {get_suffix(int(inning))} inning\n----------------------------------------")
-            sim_half_inning(teamA, teamB)
+            sim_half_inning(teamA, teamB, away_score)
+            print_display()
+            inning_state.print()
+            bases.print()
             inning+=0.5
         else: 
             print(f"Bottom of the {get_suffix(int(inning))} inning\n----------------------------------------")
-            sim_half_inning(teamB,teamA)
+            sim_half_inning(teamB,teamA, home_score)
+            print_display()
+            inning_state.print()
+            bases.print()
             inning+=0.5
         
 
@@ -98,10 +106,10 @@ def startGame(teamA, teamB):
         
 
 
-def sim_half_inning(pitching, batting): #returns outcome of inning as a tuple :
+def sim_half_inning(pitching, batting, score): #returns outcome of inning as a tuple :
                                         #(runs, hits, walks) gets added to batting team
     
-
+    score.new_inning()
     pitcher=pitching.starter
     inning_pitch_count=0
     while inning_state.outs < 3:
@@ -109,7 +117,7 @@ def sim_half_inning(pitching, batting): #returns outcome of inning as a tuple :
         input("Press ENTER to continue inning")
         batter=batting.lineup[batting.upnext]
         outcome = sim_AB(pitcher, batter)
-        update_inning_state(batter,outcome)
+        update_inning_state(batter,outcome,score)
         inning_pitch_count+=outcome[2]
         inning_state.print()
 
@@ -166,17 +174,23 @@ def sim_AB(pitcher, batter):
 
     
 
-def update_inning_state(batter, outcome): #takes outcome tuple and updates inning_state
+def update_inning_state(batter, outcome,score): #takes outcome tuple and updates inning_state
     match outcome[0]:      
         case "out" | "strikeout":
             inning_state.add_outs(1)
         case "hit":
             inning_state.add_hit()
-            inning_state.add_runs(bases.update_hit(outcome[1], batter))
+            score.add_hit()
+            runs = bases.update_hit(outcome[1], batter)
+            inning_state.add_runs(runs)
+            score.add_runs(runs)
         case "walk":
             inning_state.add_walk()
-            inning_state.add_runs(bases.update_walk(batter))
-    
+            score.add_walk()
+            runs = bases.update_walk(batter)
+            inning_state.add_runs(runs)
+            score.add_runs(runs)
+
     
         
 
@@ -191,38 +205,9 @@ def get_suffix(n): #getting the "st", "nd", "rd", "th" for the inning
         suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
     return f"{n}{suffix}"
 
-
-def makeScoreboard(inning, outs, batter, pitcher):
-    
-    return None
-
-
-def displayScore():
-    
-    home = ""
-    away = ""
-
-    for x in range(9):
-        if x < len(home_runs_by_inning):
-            home += "  " + str(home_runs_by_inning[x])
-        else:
-            home += "   "
-
-    home += "  " + str(sum(home_runs_by_inning))
-
-    for x in range(9):
-        if x < len(away_runs_by_inning):
-            away += "  " + str(away_runs_by_inning[x])
-        else:
-            away += "   "
-    
-    away += "  " + str(sum(away_runs_by_inning))
-
-    dis = "      1  2  3  4  5  6  7  8  9  T\nAway" + away + "\nHome" + home
-    
+def print_display():
+    dis=display + away + away_score.make_display() + home + home_score.make_display()
     print(dis)
-
-
 
 if __name__ == '__main__':
     main()

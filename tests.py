@@ -56,7 +56,7 @@ def print_display():
     print(dis)
 
 #test_bases() #tested, works!
-test_display()
+#test_display() #works
 
 
 

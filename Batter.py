@@ -30,7 +30,7 @@ class Batter:
         else:
             #prob = pitch[2]/(self.disc/50)
             prob=0
-            
+
         swing_rand=random.random()
 
         if swing_rand<=prob:
@@ -45,7 +45,7 @@ class Batter:
                     return self.get_hit(pitch)
                 else: #hit into an out
                     return "out"
-                
+            
             else: #swing and miss
                 return "whiff"  
             
@@ -56,8 +56,12 @@ class Batter:
                 return "ball"
     
     def swing_outcome(self, pitch): #returns result of a swing as tuple (contact, foul, hit)
+        contact=False
+        foul=False
+        hit=False
+        
 
-        return (False, False, False) #TEMP
+        return (contact, foul, hit) #TEMP
 
-    def swing(self, pitch):
+    def get_hit(self, pitch):
         pass

@@ -32,36 +32,43 @@ class Batter:
             prob=0
 
         swing_rand=random.random()
-
         if swing_rand<=prob:
-            outcome=self.swing_outcome(pitch) #tuple (contact, foul, hit)
-            
-            #TODO : refactor this to be in swing_outcome
-
-            if outcome[0]: #if any contact
-                if outcome[1]: #if contact is a foul ball
-                    return "foul"
-                elif outcome[2]: #if its a hit
-                    return self.get_hit(pitch)
-                else: #hit into an out
-                    return "out"
-            
-            else: #swing and miss
-                return "whiff"  
-            
+            return self.swing_outcome(pitch)
         else: #no swing
             if pitch[3]:#if strike
                 return "strike"
             else:
                 return "ball"
     
-    def swing_outcome(self, pitch): #returns result of a swing as tuple (contact, foul, hit)
-        contact=False
-        foul=False
-        hit=False
+    def swing_outcome(self, pitch): #returns result of a swing as a string from ["whiff", "foul", "out", "single", "double", "triple", "home run"]
         
+        contact=None
+        pitch_quality=pitch[2]
+        strike=pitch[3]
+        #get whiff or no whiff
 
-        return (contact, foul, hit) #TEMP
+        if strike:
+            vis_factor=self.vis/50
+        else:
+            vis_factor=(self.vis/50)*0.85
 
-    def get_hit(self, pitch):
+        whiff_rand=random.random()
+        whiff=vis_factor*pitch_quality*0.58
+        if whiff > whiff_rand:
+            return "whiff" #returns no contact made
+        
+        else: #determine quality of contact, starting with determining foul ball
+            contact_rand=random.random() #random from domain (0,1), determines if contact results in a hit
+            con_ratio=self.con/50
+            contact=con_ratio-(con_ratio*pitch_quality*0.9)
+            if contact > contact_rand: 
+                return self.get_hit(pitch, contact)
+            elif contact*1.1 > contact_rand: #if it was within 10% of the rand
+                return "foul"
+            else:
+                return "out"
+
+    def get_hit(self, pitch, contact):
+        pitch_velo=pitch[1]
+        
         pass

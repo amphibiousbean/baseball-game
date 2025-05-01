@@ -57,7 +57,7 @@ class Pitcher:
         velo_out_avg=(average_vel + (((self.velo/50)*average_vel)-average_vel)/(1+k*((self.velo/50)*average_vel)-average_vel))*(1-self.fatigue)
         return random.uniform(velo_out_avg-2,velo_out_avg+2)
 
-    def get_quality(self, pitch_type, pitch_velo):
+    def get_quality(self, pitch_type, pitch_velo): #domain : (0,1)
         return (self.pitches[pitch_type]/50)*0.5 #NOT FINAL EQUATION
 
     def print(self):

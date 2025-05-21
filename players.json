@@ -1,10 +1,50 @@
-{
-    "pitchers" : [
-
-    ],
-    "batters" : [
-        
-    ]
-
-    
-}
+[
+    {
+        "type": "Batter",
+        "name": "Kyle Schwarber",
+        "con": 46,
+        "pow": 80,
+        "vis": 31,
+        "disc": 80
+    },
+    {
+        "type": "Batter",
+        "name": "Bryce Harper",
+        "con": 52,
+        "pow": 73,
+        "vis": 45,
+        "disc": 54
+    },
+    {
+        "type": "Batter",
+        "name": "Bryson Stott",
+        "con": 62,
+        "pow": 40,
+        "vis": 71,
+        "disc": 58
+    },
+    {
+        "type": "Batter",
+        "name": "Trea Turner",
+        "con": 48,
+        "pow": 51,
+        "vis": 54,
+        "disc": 39
+    },
+    {
+        "type": "Batter",
+        "name": "Nick Castellanos",
+        "con": 51,
+        "pow": 56,
+        "vis": 46,
+        "disc": 25
+    },
+    {
+        "type": "Batter",
+        "name": "Alec Bohm",
+        "con": 77,
+        "pow": 65,
+        "vis": 75,
+        "disc": 42
+    }
+]

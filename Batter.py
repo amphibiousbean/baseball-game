@@ -1,5 +1,13 @@
 import random
 class Batter:
+    avg_velos = {
+        "Fastball" : 92.5,
+        "Curveball" : 82,
+        "Slider" : 86,
+        "Changeup" : 80,
+        "Sinker" : 91
+    } 
+
     #name : their name
     #pow : ability to hit for power
     #con : ability to make solid contact
@@ -60,15 +68,21 @@ class Batter:
         else: #determine quality of contact, starting with determining foul ball
             contact_rand=random.random() #random from domain (0,1), determines if contact results in a hit
             con_ratio=self.con/50
-            contact=con_ratio-(con_ratio*pitch_quality*0.9)
+            contact=con_ratio-(con_ratio*pitch_quality*0.9) #domain [con_ratio/10, con_ratio], typically lower.
             if contact > contact_rand: 
-                return self.get_hit(pitch, contact)
+                rand_fact=contact-contact_rand #used in con_factor calculation. always less than 1, typically low
+                return self.get_hit(pitch, contact, rand_fact)
             elif contact*1.1 > contact_rand: #if it was within 10% of the rand
                 return "foul"
             else:
                 return "out"
 
-    def get_hit(self, pitch, contact):
-        pitch_velo=pitch[1]
+    def get_hit(self, pitch, contact, rand_fact): #TODO
+        velo_factor=(pitch[1]/self.avg_velos[pitch[0]])*1.05 #(pitch velo / avg velo of that pitch type)*1.05
+        con_factor=
+        pow_factor=velo_factor*(self.pow/50)
+
+        
+
         
         pass

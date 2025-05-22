@@ -1,9 +1,14 @@
+import savant_batter as batter
+import savant_pitcher as pitcher
 from pybaseball import statcast_batter
 from pybaseball import statcast_pitcher
 from pybaseball import playerid_lookup
 from pybaseball import batting_stats_bref
 from datetime import date
 import json
+
+#TODO: refactor this all into multiple files to separate stat collection from the attribute conversion
+
 
 ZONE_WIDTH = 0.83
 ZONE_TOP = 3.5
@@ -24,7 +29,6 @@ def add_player(player):
         
         json.dump(data, file, indent = 4)
     
-
 
 std_dict={
     "exit_vel" : 2.4,
@@ -64,18 +68,6 @@ def calc_stat_impact(x, stat, invert=False):
         scaler*=-1
     return scaler  
     
-def get_chase(outside_zone):
-    outside_swings = outside_zone[outside_zone['description'].isin(swing_events)]
-
-    total_outside = len(outside_zone)
-    swings_outside = len(outside_swings)
-
-    return (swings_outside / total_outside) * 100 if total_outside > 0 else 0
-
-
-today = date.today()
-f_date = today.strftime("%Y-%m-%d")
-start_date='2024-03-28'
 mode=""
 while mode != "b" or "p":
     mode=input("Type \"p\" for a pitcher or \"b\" for a batter : ")
@@ -90,43 +82,19 @@ if mode == "b":
         "type" : "Batter",
         "name" : name
         }
-    not_AB=['sac_bunt','sac_fly','hit_by_pitch', 'walk']
-    swing_events = ['swinging_strike', 'foul', 'foul_tip', 'hit_into_play']
+    #setting dataframes
+    data=batter.pull_player_data(player)
+    batted_balls=batter.filter_non_events(data)
+    at_bats=batter.filter_non_AB(data)
 
-    data=statcast_batter(start_date, f_date, player_id=playerid)
-
-    outside_zone = data[
-        (data['plate_x'].abs() > ZONE_WIDTH) |
-        (data['plate_z'] > ZONE_TOP) |
-        (data['plate_z'] < ZONE_BOTTOM)
-    ]
-
-    batted_balls=data[data['events'].notnull()]
-    batted_balls['estimated_ba_using_speedangle'].fillna(0, inplace=True)
-    at_bats=batted_balls[~batted_balls['events'].isin(not_AB)]
-
-    #walks+k
-    walks = batted_balls[batted_balls['events'] == 'walk'].shape[0]
-    strikeouts = batted_balls[batted_balls['events'].isin(['strikeout', 'strikeout_swinging', 'strikeout_looking'])].shape[0]
-    total_pa=batted_balls.shape[0]
-    bb=((walks/total_pa)*100)
-    k=((strikeouts/total_pa)*100)
-
-    #whiffs+chase
-    desc_group=data.groupby('description').size()
-    numerator=desc_group['swinging_strike'] + desc_group['swinging_strike_blocked']
-    denom=numerator+desc_group['foul']+desc_group['foul_tip']+desc_group['hit_into_play']
-    whiff_rate=(numerator/denom)*100
-    chase_rate=get_chase(outside_zone)
-
-    #everything else
-    exit_vel=calc_stat_impact(batted_balls.launch_speed.agg("mean"), "exit_vel")
-    xwoba=calc_stat_impact(batted_balls.estimated_woba_using_speedangle.agg("mean"), "xwoba") #TODO: take difference of their stats from the average and compare it to the difference of the max/min to the avg
-    xba=calc_stat_impact(at_bats.estimated_ba_using_speedangle.agg("mean"), "xba")
-    bb=calc_stat_impact(bb, "bb")
-    k=calc_stat_impact(k,"k", invert=True)
-    whiff=calc_stat_impact(whiff_rate,"whiff", invert=True)
-    chase=calc_stat_impact(chase_rate,"chase",invert=True)
+    #getting stat impact
+    exit_vel=calc_stat_impact(batter.get_exit_vel(batted_balls), "exit_vel")
+    xwoba=calc_stat_impact(batter.get_xwoba(batted_balls), "xwoba")
+    xba=calc_stat_impact(batter.get_xba(batted_balls), "xba")
+    bb=calc_stat_impact(batter.get_bb(data), "bb")
+    k=calc_stat_impact(batter.get_k(data),"k", invert=True)
+    whiff=calc_stat_impact(batter.get_whiff(data),"whiff", invert=True)
+    chase=calc_stat_impact(batter.get_chase(data),"chase",invert=True)
 
     player["con"] = calc_att(xba,whiff)
     player["pow"] = calc_att(xwoba, exit_vel)
@@ -136,9 +104,6 @@ if mode == "b":
     add_player(player)
     print(player)
     
-    
-
 else:
-    data=statcast_pitcher(start_date, f_date, player_id=playerid)
+    pass
 
-#print(data)

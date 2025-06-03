@@ -70,5 +70,80 @@
         "pow": 36,
         "vis": 47,
         "disc": 37
+    },
+    {
+        "type": "Pitcher",
+        "name": "Zack Wheeler",
+        "velo": {
+            "Curveball": 53,
+            "Cutter": 59,
+            "Four-seam Fastball": 57,
+            "Splitter": 51,
+            "Sinker": 56,
+            "Sweeper": 56
+        },
+        "K/9": 69,
+        "BB/9": 58,
+        "HR/9": 62,
+        "H/9": 69
+    },
+    {
+        "type": "Pitcher",
+        "name": "Jes\u00fas Luzardo",
+        "velo": {
+            "Changeup": 54,
+            "Four-seam Fastball": 59,
+            "Sinker": 59,
+            "Slider": 53,
+            "Sweeper": 63
+        },
+        "K/9": 60,
+        "BB/9": 52,
+        "HR/9": 52,
+        "H/9": 55
+    },
+    {
+        "type": "Pitcher",
+        "name": "Cristopher S\u00e1nchez",
+        "velo": {
+            "Changeup": 49,
+            "Sinker": 57,
+            "Slider": 49
+        },
+        "K/9": 61,
+        "BB/9": 47,
+        "HR/9": 51,
+        "H/9": 59
+    },
+    {
+        "type": "Pitcher",
+        "name": "Ranger Su\u00e1rez",
+        "velo": {
+            "Changeup": 32,
+            "Curveball": 36,
+            "Cutter": 42,
+            "Four-seam Fastball": 41,
+            "Sinker": 40,
+            "Slider": 33
+        },
+        "K/9": 50,
+        "BB/9": 56,
+        "HR/9": 72,
+        "H/9": 73
+    },
+    {
+        "type": "Pitcher",
+        "name": "Aaron Nola",
+        "velo": {
+            "Changeup": 44,
+            "Cutter": 38,
+            "Four-seam Fastball": 38,
+            "Knuckle-curve": 44,
+            "Sinker": 37
+        },
+        "K/9": 53,
+        "BB/9": 53,
+        "HR/9": 48,
+        "H/9": 42
     }
 ]

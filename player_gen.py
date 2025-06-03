@@ -28,7 +28,7 @@ def add_player(player):
         json.dump(data, file, indent = 4)
     
 
-std_dict={
+stdev_bat={
     "exit_vel" : 2.4,
     "xba" : 0.03,
     "xwoba" : .04,
@@ -61,14 +61,75 @@ avg_bat = {
 
 }
 
+velo_avg={
+    "Four-seam Fastball" : 94.26,
+    "Sinker" : 93.58,
+    "Cutter" : 89.49,
+    "Slider" : 85.8,
+    "Changeup" : 86.36,
+    "Curveball" : 79.76,
+    "Splitter" : 86.73,
+    "Sweeper" : 82.17,
+    "Slurve" : 81.3,
+    "Knuckle-curve" : 80.4
+}
+
+velo_stdev={
+    "Four-seam Fastball" : 2.38,
+    "Sinker" : 2.51,
+    "Cutter" : 2.7,
+    "Slider" : 2.66,
+    "Changeup" : 3.31,
+    "Curveball" : 3.51,
+    "Splitter" : 3.2,
+    "Sweeper" : 2.85,
+    "Slurve" : 2.23,
+    "Knuckle-curve" : 3.51
+
+}
+
+avg_pitch={
+    "k" : 21.8,
+    "bb" : 7.9,
+    "xwoba" : 0.327,
+    "xwobacon" : 0.383,
+    "xba" : 0.256,
+    "xbacon" : 0.383,
+    "sweet_spot" : 33.9,
+    "barrel_rate" : 8.7,
+    "hard_hit" : 41.5,
+    "ev50" : 78.8
+}
+
+stdev_pitch={
+    "k" : 5.3,
+    "bb" : 2.3,
+    "xwoba" : 0.039,
+    "xwobacon" : 0.031,
+    "xba" : 0.028,
+    "xbacon" : 0.025,
+    "sweet_spot" : 3.9,
+    "barrel_rate" : 2.1,
+    "hard_hit" : 4.7,
+    "ev50" : 4.7
+}
 
 def calc_att(atts):
     att=round(50+(sum(atts)))
     return max(20, min(80, att))
 
-def calc_stat_impact(x, stat, invert=False):
+def calc_velo(velo):
+    velo_atts={}
+    for pitch in velo:
+        att=round(50+velo[pitch])
+        velo_atts[pitch] = max(20, min(80,att))
+    return velo_atts
+
+def calc_stat_impact_bat(x, stat, invert=False):
+    
     mean = avg_bat[stat]
-    std = std_dict[stat]
+    std = stdev_bat[stat]
+    
 
     if std == 0:
         return 0
@@ -78,7 +139,40 @@ def calc_stat_impact(x, stat, invert=False):
     if invert:
         scaler*=-1
     return scaler  
+
+def calc_stat_impact_pitch(x, stat, invert=False):
     
+    mean = avg_pitch[stat]
+    std = stdev_pitch[stat]
+    
+
+    if std == 0:
+        return 0
+
+    z = (x - mean) / std
+    scaler=10*z
+    if invert:
+        scaler*=-1
+    return scaler
+
+
+def calc_velo_impact(velo):
+    dict={}
+    for pitch in velo:
+        x=velo[pitch]
+        mean=velo_avg[pitch]
+        std=velo_stdev[pitch]
+        if std==0:
+            return 0
+        z = (x-mean) / std
+        scaler=10*z
+        dict[pitch]=scaler
+    return dict
+    
+
+
+
+######################################################################
 mode=""
 while mode != "b" or "p":
     mode=input("Type \"p\" for a pitcher or \"b\" for a batter : ")
@@ -87,12 +181,10 @@ while mode != "b" or "p":
 name=input("Enter player name : ")
 player_name=tuple(name.lower().split(' '))
 #playerid=playerid_lookup(player[1], player[0]).iloc[0]["key_mlbam"]
+
+
 if mode == "b":
     
-    player={
-        "type" : "Batter",
-        "name" : name
-        }
     #setting dataframes
     data=batter.pull_player_data(player_name)
     events=batter.filter_non_events(data)
@@ -100,25 +192,31 @@ if mode == "b":
     at_bats=batter.filter_non_AB(data)
     batted_balls=batter.only_batted_balls(data)
 
+
+    player={
+        "type" : "Batter",
+        "name" : name
+        }
+
     #setting batter's strike zone
     top_zone=data['sz_top'].agg('mean')
     bot_zone=data['sz_bot'].agg('mean')
     sz=[top_zone, bot_zone]
 
     #getting stat impact
-    exit_vel=calc_stat_impact(batter.get_exit_vel(events), "exit_vel")
-    xwoba=calc_stat_impact(batter.get_xwoba(events), "xwoba")
-    xba=calc_stat_impact(batter.get_xba(xba_filter), "xba")
-    bb=calc_stat_impact(batter.get_bb(events), "bb")
-    k=calc_stat_impact(batter.get_k(events),"k", invert=True)
-    whiff=calc_stat_impact(batter.get_whiff(data),"whiff", invert=True)
-    chase=calc_stat_impact(batter.get_chase(data,sz),"chase",invert=True)
-    sweet_spot=calc_stat_impact(batter.get_la_ss_rate(batted_balls), "sweet_spot")
-    solid_con=calc_stat_impact(batter.get_solid_con_rate(batted_balls), "solid_con")
-    barrel_rate=calc_stat_impact(batter.get_barrel_rate(batted_balls), "barrel_rate")
-    hard_hit=calc_stat_impact(batter.get_hard_hit(batted_balls), "hard_hit")
-    ev50=calc_stat_impact(batter.get_ev50(batted_balls), "ev50")
-    z_whiff=calc_stat_impact(batter.get_zone_whiff(data,sz),"z_whiff", invert=True)
+    exit_vel=calc_stat_impact_bat(batter.get_exit_vel(events), "exit_vel")
+    xwoba=calc_stat_impact_bat(batter.get_xwoba(events), "xwoba")
+    xba=calc_stat_impact_bat(batter.get_xba(xba_filter), "xba")
+    bb=calc_stat_impact_bat(batter.get_bb(events), "bb")
+    k=calc_stat_impact_bat(batter.get_k(events),"k", invert=True)
+    whiff=calc_stat_impact_bat(batter.get_whiff(data),"whiff", invert=True)
+    chase=calc_stat_impact_bat(batter.get_chase(data,sz),"chase",invert=True)
+    sweet_spot=calc_stat_impact_bat(batter.get_la_ss_rate(batted_balls), "sweet_spot")
+    solid_con=calc_stat_impact_bat(batter.get_solid_con_rate(batted_balls), "solid_con")
+    barrel_rate=calc_stat_impact_bat(batter.get_barrel_rate(batted_balls), "barrel_rate")
+    hard_hit=calc_stat_impact_bat(batter.get_hard_hit(batted_balls), "hard_hit")
+    ev50=calc_stat_impact_bat(batter.get_ev50(batted_balls), "ev50")
+    z_whiff=calc_stat_impact_bat(batter.get_zone_whiff(data,sz),"z_whiff", invert=True)
     
     #list to pass to calc_att
     con=[xba*0.3, solid_con*0.3, sweet_spot*0.3,exit_vel*0.1]
@@ -132,10 +230,53 @@ if mode == "b":
     player["vis"] = calc_att(vis)
     player["disc"] = calc_att(disc)
     
-    #adding to players.json, printing to cmd
-    add_player(player)
-    print(player)
     
 else:
-    pass
+    player ={
+        "type" : "Pitcher",
+        "name" : name
+    }
+
+    #setting dataframes
+    data=pitcher.pull_player_data(player_name)
+    events=pitcher.filter_non_events(data)
+    xba_filter=pitcher.filter_for_xba(events)
+    #at_bats=pitcher.filter_non_AB(data)
+    batted_balls=pitcher.only_batted_balls(data)
+    """
+    pitcher : 
+    velo : straightforward
+    k : straight forward
+    bb : straight forward
+    hr rate : ev50, barrel%, xwoba, hardhit %
+    hit rate : xba, sweetspot%, xbacon
+    control : bb%, 
+    """
+
+    k = calc_stat_impact_pitch(pitcher.get_k(events), "k")
+    bb = calc_stat_impact_pitch(pitcher.get_bb(events), "bb", invert=True)
+    ev50 = calc_stat_impact_pitch(pitcher.get_ev50(batted_balls), "ev50", invert=True)
+    barrel = calc_stat_impact_pitch(pitcher.get_barrel_rate(batted_balls), "barrel_rate", invert=True)
+    xwoba = calc_stat_impact_pitch(pitcher.get_xwoba(events), "xwoba", invert=True)
+    xwobacon = calc_stat_impact_pitch(pitcher.get_xwoba(batted_balls), "xwobacon", invert=True)
+    hard_hit = calc_stat_impact_pitch(pitcher.get_hard_hit(batted_balls), "hard_hit", invert=True)
+    xba = calc_stat_impact_pitch(pitcher.get_xba(xba_filter), "xba", invert=True)
+    xbacon = calc_stat_impact_pitch(pitcher.get_xba(batted_balls), "xbacon", invert=True)
+    sweet_spot = calc_stat_impact_pitch(pitcher.get_la_ss_rate(batted_balls), "sweet_spot", invert=True)
+    velos = calc_velo_impact(pitcher.get_velo(data))
+
+    hr=[ev50*0.3, barrel*0.2,hard_hit*0.3,xwoba*0.1]
+    hit=[xwobacon*0.15,xba*0.3,xbacon*0.3,sweet_spot*0.15]
+
+    player["velo"]=calc_velo(velos)
+    player["K/9"] = calc_att([k])
+    player["BB/9"] = calc_att([bb])
+    player["HR/9"] = calc_att(hr)
+    player["H/9"] = calc_att(hit)
+
+
+#adding to players.json, printing to cmd
+add_player(player)
+print(player)
+
 

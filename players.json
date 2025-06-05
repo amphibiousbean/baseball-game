@@ -73,22 +73,6 @@
     },
     {
         "type": "Pitcher",
-        "name": "Zack Wheeler",
-        "velo": {
-            "Curveball": 53,
-            "Cutter": 59,
-            "Four-seam Fastball": 57,
-            "Splitter": 51,
-            "Sinker": 56,
-            "Sweeper": 56
-        },
-        "K/9": 69,
-        "BB/9": 58,
-        "HR/9": 62,
-        "H/9": 69
-    },
-    {
-        "type": "Pitcher",
         "name": "Jes\u00fas Luzardo",
         "velo": {
             "Changeup": 54,
@@ -145,5 +129,125 @@
         "BB/9": 53,
         "HR/9": 48,
         "H/9": 42
+    },
+    {
+        "type": "Pitcher",
+        "name": "Garrett Crochet",
+        "velo": {
+            "Changeup": 57,
+            "Cutter": 56,
+            "Four-seam Fastball": 57,
+            "Sinker": 57,
+            "Sweeper": 53
+        },
+        "stuff": {
+            "Changeup": 57,
+            "Cutter": 56,
+            "Four-seam Fastball": 57,
+            "Sinker": 57,
+            "Sweeper": 53
+        },
+        "K/9": 67,
+        "BB/9": 50,
+        "HR/9": 58,
+        "H/9": 59,
+        "control": 50
+    },
+    {
+        "type": "Batter",
+        "name": "Jarren Duran",
+        "con": 55,
+        "pow": 55,
+        "vis": 45,
+        "disc": 43
+    },
+    {
+        "type": "Batter",
+        "name": "Rafael Devers",
+        "con": 59,
+        "pow": 66,
+        "vis": 44,
+        "disc": 58
+    },
+    {
+        "type": "Batter",
+        "name": "Wilyer Abreu",
+        "con": 50,
+        "pow": 57,
+        "vis": 52,
+        "disc": 49
+    },
+    {
+        "type": "Batter",
+        "name": "Romy Gonzalez",
+        "con": 50,
+        "pow": 66,
+        "vis": 35,
+        "disc": 44
+    },
+    {
+        "type": "Batter",
+        "name": "Alex Bregman",
+        "con": 56,
+        "pow": 54,
+        "vis": 60,
+        "disc": 59
+    },
+    {
+        "type": "Batter",
+        "name": "Trevor Story",
+        "con": 45,
+        "pow": 53,
+        "vis": 39,
+        "disc": 37
+    },
+    {
+        "type": "Batter",
+        "name": "Ceddanne Rafaela",
+        "con": 52,
+        "pow": 53,
+        "vis": 42,
+        "disc": 35
+    },
+    {
+        "type": "Batter",
+        "name": "Connor Wong",
+        "con": 42,
+        "pow": 44,
+        "vis": 43,
+        "disc": 48
+    },
+    {
+        "type": "Batter",
+        "name": "Kristian Campbell",
+        "con": 44,
+        "pow": 50,
+        "vis": 45,
+        "disc": 55
+    },
+    {
+        "type": "Pitcher",
+        "name": "Zack Wheeler",
+        "velo": {
+            "Curveball": 53,
+            "Cutter": 59,
+            "Four-seam Fastball": 57,
+            "Splitter": 51,
+            "Sinker": 56,
+            "Sweeper": 56
+        },
+        "stuff": {
+            "Curveball": 53,
+            "Cutter": 59,
+            "Four-seam Fastball": 57,
+            "Splitter": 51,
+            "Sinker": 56,
+            "Sweeper": 56
+        },
+        "K/9": 69,
+        "BB/9": 58,
+        "HR/9": 62,
+        "H/9": 69,
+        "control": 58
     }
 ]

@@ -36,7 +36,7 @@ class bases:
     #pops end element off, returns what it was, adds the next element
     def enqueue_hit(self, next):
         popped=self.runners.pop()
-        self.runners.appendleft(next.name)
+        self.runners.appendleft(next.name if next else None)
         print(str(self.runners))
         return popped
     
@@ -50,7 +50,7 @@ class bases:
             return None
         else: #1st+2nd, bases loaded
             popped=self.runners.pop()
-            self.runners.appendleft(batter.name)
+            self.runners.appendleft(batter.name if batter else None)
             return popped
 
     def print(self):

@@ -7,7 +7,28 @@ import scoreboard as scoreboard
 import time
 import random
 import collections as c
-
+PHI=[
+    "Bryson Stott",
+    "Trea Turner",
+    "Bryce Harper",
+    "Kyle Schwarber",
+    "Nick Castellanos",
+    "J.T. Realmuto",
+    "Max Kepler",
+    "Alec Bohm",
+    "Johan Rojas"
+]
+BOS=[
+    "Jarren Duran",
+    "Rafael Devers",
+    "Wilyer Abreu",
+    "Romy Gonzalez",
+    "Alex Bregman",
+    "Trevor Story",
+    "Ceddanne Rafaela",
+    "Connor Wong",
+    "Kristian Campbell"
+]
 outcomes=[1,2,3,4]
 runner1="1"
 runner2="2"
@@ -55,6 +76,18 @@ def print_display():
     dis=display + away + away_score.make_display() + home + home_score.make_display()
     print(dis)
 
+
+def test_teams(details):
+    phillies=Team.Team("Phillies",PHI, "Zack Wheeler")
+    red_sox=Team.Team("Red Sox", BOS, "Garrett Crochet")
+    print(phillies.str(details))
+    print("\n\n" + red_sox.str(details))
+
+#wheels=Pitcher.Pitcher("Zack Wheeler")
+#wheels.print()
+#test_teams(False)
+#print("----------------------------------------------------------")
+#test_teams(True)
 #test_bases() #tested, works!
 #test_display() #works
 

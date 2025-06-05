@@ -172,111 +172,123 @@ def calc_velo_impact(velo):
 
 
 
-######################################################################
-mode=""
-while mode != "b" or "p":
-    mode=input("Type \"p\" for a pitcher or \"b\" for a batter : ")
-    if mode == "b" or "p":
-        break
-name=input("Enter player name : ")
-player_name=tuple(name.lower().split(' '))
-#playerid=playerid_lookup(player[1], player[0]).iloc[0]["key_mlbam"]
+###########################    SCRIPT    ######################################
+looping=True
+while looping:
+    mode=""
+    while mode != "b" or "p":
+        mode=input("Type \"p\" for a pitcher or \"b\" for a batter : ")
+        if mode == "b" or "p":
+            break
+    name=input("Enter player name : ")
+    player_name=tuple(name.lower().split(' '))
+    id_res=playerid_lookup(player_name[1], player_name[0])
+    if id_res.empty:
+        print(print(f"No player found for: {player_name[1]} {player_name[0]}. Please try again"))
+        continue
+    #playerid=playerid_lookup(player[1], player[0]).iloc[0]["key_mlbam"]
 
 
-if mode == "b":
-    
-    #setting dataframes
-    data=batter.pull_player_data(player_name)
-    events=batter.filter_non_events(data)
-    xba_filter=batter.filter_for_xba(events)
-    at_bats=batter.filter_non_AB(data)
-    batted_balls=batter.only_batted_balls(data)
+    if mode == "b":
+        
+        #setting dataframes
+        data=batter.pull_player_data(player_name)
+        events=batter.filter_non_events(data)
+        xba_filter=batter.filter_for_xba(events)
+        at_bats=batter.filter_non_AB(data)
+        batted_balls=batter.only_batted_balls(data)
 
 
-    player={
-        "type" : "Batter",
-        "name" : name
+        player={
+            "type" : "Batter",
+            "name" : name
+            }
+
+        #setting batter's strike zone
+        top_zone=data['sz_top'].agg('mean')
+        bot_zone=data['sz_bot'].agg('mean')
+        sz=[top_zone, bot_zone]
+
+        #getting stat impact
+        exit_vel=calc_stat_impact_bat(batter.get_exit_vel(events), "exit_vel")
+        xwoba=calc_stat_impact_bat(batter.get_xwoba(events), "xwoba")
+        xba=calc_stat_impact_bat(batter.get_xba(xba_filter), "xba")
+        bb=calc_stat_impact_bat(batter.get_bb(events), "bb")
+        k=calc_stat_impact_bat(batter.get_k(events),"k", invert=True)
+        whiff=calc_stat_impact_bat(batter.get_whiff(data),"whiff", invert=True)
+        chase=calc_stat_impact_bat(batter.get_chase(data,sz),"chase",invert=True)
+        sweet_spot=calc_stat_impact_bat(batter.get_la_ss_rate(batted_balls), "sweet_spot")
+        solid_con=calc_stat_impact_bat(batter.get_solid_con_rate(batted_balls), "solid_con")
+        barrel_rate=calc_stat_impact_bat(batter.get_barrel_rate(batted_balls), "barrel_rate")
+        hard_hit=calc_stat_impact_bat(batter.get_hard_hit(batted_balls), "hard_hit")
+        ev50=calc_stat_impact_bat(batter.get_ev50(batted_balls), "ev50")
+        z_whiff=calc_stat_impact_bat(batter.get_zone_whiff(data,sz),"z_whiff", invert=True)
+        
+        #list to pass to calc_att
+        con=[xba*0.3, solid_con*0.3, sweet_spot*0.3,exit_vel*0.1]
+        pow=[xwoba*0.2,barrel_rate*0.1, hard_hit*0.4, ev50*0.3]
+        vis=[z_whiff*0.25, bb*0.25, whiff*0.5]
+        disc=[chase*0.5, k*0.2, bb*0.3]    
+
+        #calculating attributes
+        player["con"] = calc_att(con)
+        player["pow"] = calc_att(pow)
+        player["vis"] = calc_att(vis)
+        player["disc"] = calc_att(disc)
+        
+        
+    else:
+        player ={
+            "type" : "Pitcher",
+            "name" : name
+            
         }
 
-    #setting batter's strike zone
-    top_zone=data['sz_top'].agg('mean')
-    bot_zone=data['sz_bot'].agg('mean')
-    sz=[top_zone, bot_zone]
+        #setting dataframes
+        data=pitcher.pull_player_data(player_name)
+        events=pitcher.filter_non_events(data)
+        xba_filter=pitcher.filter_for_xba(events)
+        #at_bats=pitcher.filter_non_AB(data)
+        batted_balls=pitcher.only_batted_balls(data)
+        """
+        pitcher : 
+        velo : straightforward
+        k : straight forward
+        bb : straight forward
+        hr rate : ev50, barrel%, xwoba, hardhit %
+        hit rate : xba, sweetspot%, xbacon
+        control : bb%, 
+        """
 
-    #getting stat impact
-    exit_vel=calc_stat_impact_bat(batter.get_exit_vel(events), "exit_vel")
-    xwoba=calc_stat_impact_bat(batter.get_xwoba(events), "xwoba")
-    xba=calc_stat_impact_bat(batter.get_xba(xba_filter), "xba")
-    bb=calc_stat_impact_bat(batter.get_bb(events), "bb")
-    k=calc_stat_impact_bat(batter.get_k(events),"k", invert=True)
-    whiff=calc_stat_impact_bat(batter.get_whiff(data),"whiff", invert=True)
-    chase=calc_stat_impact_bat(batter.get_chase(data,sz),"chase",invert=True)
-    sweet_spot=calc_stat_impact_bat(batter.get_la_ss_rate(batted_balls), "sweet_spot")
-    solid_con=calc_stat_impact_bat(batter.get_solid_con_rate(batted_balls), "solid_con")
-    barrel_rate=calc_stat_impact_bat(batter.get_barrel_rate(batted_balls), "barrel_rate")
-    hard_hit=calc_stat_impact_bat(batter.get_hard_hit(batted_balls), "hard_hit")
-    ev50=calc_stat_impact_bat(batter.get_ev50(batted_balls), "ev50")
-    z_whiff=calc_stat_impact_bat(batter.get_zone_whiff(data,sz),"z_whiff", invert=True)
-    
-    #list to pass to calc_att
-    con=[xba*0.3, solid_con*0.3, sweet_spot*0.3,exit_vel*0.1]
-    pow=[xwoba*0.2,barrel_rate*0.1, hard_hit*0.4, ev50*0.3]
-    vis=[z_whiff*0.25, bb*0.25, whiff*0.5]
-    disc=[chase*0.5, k*0.2, bb*0.3]    
+        k = calc_stat_impact_pitch(pitcher.get_k(events), "k")
+        bb = calc_stat_impact_pitch(pitcher.get_bb(events), "bb", invert=True)
+        ev50 = calc_stat_impact_pitch(pitcher.get_ev50(batted_balls), "ev50", invert=True)
+        barrel = calc_stat_impact_pitch(pitcher.get_barrel_rate(batted_balls), "barrel_rate", invert=True)
+        xwoba = calc_stat_impact_pitch(pitcher.get_xwoba(events), "xwoba", invert=True)
+        xwobacon = calc_stat_impact_pitch(pitcher.get_xwoba(batted_balls), "xwobacon", invert=True)
+        hard_hit = calc_stat_impact_pitch(pitcher.get_hard_hit(batted_balls), "hard_hit", invert=True)
+        xba = calc_stat_impact_pitch(pitcher.get_xba(xba_filter), "xba", invert=True)
+        xbacon = calc_stat_impact_pitch(pitcher.get_xba(batted_balls), "xbacon", invert=True)
+        sweet_spot = calc_stat_impact_pitch(pitcher.get_la_ss_rate(batted_balls), "sweet_spot", invert=True)
+        velos = calc_velo_impact(pitcher.get_velo(data))
 
-    #calculating attributes
-    player["con"] = calc_att(con)
-    player["pow"] = calc_att(pow)
-    player["vis"] = calc_att(vis)
-    player["disc"] = calc_att(disc)
-    
-    
-else:
-    player ={
-        "type" : "Pitcher",
-        "name" : name
-    }
+        hr=[ev50*0.3, barrel*0.2,hard_hit*0.3,xwoba*0.1]
+        hit=[xwobacon*0.15,xba*0.3,xbacon*0.3,sweet_spot*0.15]
 
-    #setting dataframes
-    data=pitcher.pull_player_data(player_name)
-    events=pitcher.filter_non_events(data)
-    xba_filter=pitcher.filter_for_xba(events)
-    #at_bats=pitcher.filter_non_AB(data)
-    batted_balls=pitcher.only_batted_balls(data)
-    """
-    pitcher : 
-    velo : straightforward
-    k : straight forward
-    bb : straight forward
-    hr rate : ev50, barrel%, xwoba, hardhit %
-    hit rate : xba, sweetspot%, xbacon
-    control : bb%, 
-    """
-
-    k = calc_stat_impact_pitch(pitcher.get_k(events), "k")
-    bb = calc_stat_impact_pitch(pitcher.get_bb(events), "bb", invert=True)
-    ev50 = calc_stat_impact_pitch(pitcher.get_ev50(batted_balls), "ev50", invert=True)
-    barrel = calc_stat_impact_pitch(pitcher.get_barrel_rate(batted_balls), "barrel_rate", invert=True)
-    xwoba = calc_stat_impact_pitch(pitcher.get_xwoba(events), "xwoba", invert=True)
-    xwobacon = calc_stat_impact_pitch(pitcher.get_xwoba(batted_balls), "xwobacon", invert=True)
-    hard_hit = calc_stat_impact_pitch(pitcher.get_hard_hit(batted_balls), "hard_hit", invert=True)
-    xba = calc_stat_impact_pitch(pitcher.get_xba(xba_filter), "xba", invert=True)
-    xbacon = calc_stat_impact_pitch(pitcher.get_xba(batted_balls), "xbacon", invert=True)
-    sweet_spot = calc_stat_impact_pitch(pitcher.get_la_ss_rate(batted_balls), "sweet_spot", invert=True)
-    velos = calc_velo_impact(pitcher.get_velo(data))
-
-    hr=[ev50*0.3, barrel*0.2,hard_hit*0.3,xwoba*0.1]
-    hit=[xwobacon*0.15,xba*0.3,xbacon*0.3,sweet_spot*0.15]
-
-    player["velo"]=calc_velo(velos)
-    player["K/9"] = calc_att([k])
-    player["BB/9"] = calc_att([bb])
-    player["HR/9"] = calc_att(hr)
-    player["H/9"] = calc_att(hit)
+        player["velo"]=calc_velo(velos)
+        player["stuff"]=calc_velo(velos) #PLACEHOLDER FOR NOW JUST TO TEST FUNCTIONALITY OF MOVING PITCHER TO SIM
+        player["K/9"] = calc_att([k])
+        player["BB/9"] = calc_att([bb])
+        player["HR/9"] = calc_att(hr)
+        player["H/9"] = calc_att(hit)
+        player["control"] = calc_att([bb]) #PLACEHOLDER FOR NOW JUST TO TEST FUNCTIONALITY OF MOVING PITCHER TO SIM
 
 
-#adding to players.json, printing to cmd
-add_player(player)
-print(player)
+    #adding to players.json, printing to cmd
+    add_player(player)
+    print("\n\n" + str(player))
+    exit_code=input("\n\nType \"exit\" to exit, any other key to add another player. ")
+    if exit_code=="exit":
+        looping=False
 
 

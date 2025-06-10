@@ -10,10 +10,14 @@ import time
 import random
 import box_score as box
 import traceback
+import config
 
 game_loop = False
 EXTRA_INNINGS = False
 EXTRAS_COUNTER=0
+GAME_SPEED=0
+SIM_NUM=0
+PRINT=False
 
 averages_dict = {
      "k_percent" : 0.2106,
@@ -77,53 +81,82 @@ BOS=[
 
 
 def main():
-
-    #displayScore()
+    global GAME_SPEED, SIM_NUM, PRINT
     home_team = Team.Team("Phillies", PHI, "Zack Wheeler")
     away_team = Team.Team("Red Sox", BOS, "Garrett Crochet")
-    phils=0
+    home=0
     away=0
     winner=""
-    #sim_half_inning(home_team,away_team,away_score)
-    #print_display()
-    #inning_state.print()
-    #bases.print()
+    start_time=None
+    while SIM_NUM == 0:
+        SIM_NUM=int(input("Enter the number of games you wish to simulate : "))
+        config.update_sim_num(SIM_NUM)
+        if SIM_NUM == 0:
+            print("Cannot simulate zero games")
+    
+    speed=input("""Game speed is the length of the delay between actions\n
+                \nSIM : No delay and no stop actions. Use when simulating a larger number of games\n
+                \nAny number  : Delay will be the number you input in seconds. Will have stop actions.\n
+                \nDesired speed : """)
+    print_input=input("Would you like printed results for every action? (Not recommended for large sims)\n\ny/N : ")
+    if print_input and print_input == "y" :
+        config.update_print(True)
+        PRINT=True
+       
+
+    if speed == "SIM":
+        start_time=time.time()
+    else:
+        config.update_speed(speed)
+        GAME_SPEED=int(speed)
+
     try:
-        for i in range(50):
+        print("Simulator running...")
+        for i in range(SIM_NUM):
             winner = startGame(home_team, away_team)
-            if winner == "Phillies":
-                phils+=1
+            if winner == home_team.name:
+                home+=1
             else:
                 away+=1
-            print("Record : " + str(phils) +"-"+str(away))
-            for batter in home_team.lineup:
-                batter.print_avg_factors()
-            for batter in away_team.lineup:
-                batter.print_avg_factors()
 
+        print("Record : " + str(home) +"-"+str(away))
+        
+        if start_time:
+            elapsed=time.time()-start_time
+            print(f"Sim time elapsed : {elapsed}")
+
+        factors_time=time.time()
+        with open("test_factors.txt", "a") as file:
+            file.write("------------------TEST @ " + str(start_time)+"------------------\n")
+            for batter in home_team.lineup:
+                file.write("\n"+str(batter.get_avg_factors() + "\n"))
+            for batter in away_team.lineup:
+                file.write("\n"+str(batter.get_avg_factors() + "\n"))
+        print(f"Factors write time : {time.time()-factors_time}")
+        
     except Exception as e:
         traceback.print_exc()
-        print("Record : " + str(phils) +"-"+str(away))
+        print("Record : " + str(home) +"-"+str(away))
     
 
 def startGame(teamA, teamB):
-    global game_loop, EXTRA_INNINGS, EXTRAS_COUNTER
+    global game_loop, EXTRA_INNINGS, EXTRAS_COUNTER, GAME_SPEED
     winner=""
     home_box=box.box_score(teamA.name, teamA.lineup, [teamA.starter])
     away_box=box.box_score(teamB.name, teamB.lineup, [teamB.starter])
-    game_loop=True
-    """
-    start_str = ""
-    while start_str != "start" or "exit":
-        start_str = input("Type \"start\" to begin simulation or type \"exit\" to exit : ")
-        if start_str == "start":
-            game_loop=True
-            break
-        elif start_str == "exit":
-            return
-        else:
-            print("Try again\n")
-    """
+    if GAME_SPEED != 0:
+        start_str = ""
+        while start_str != "start" or "exit":
+            start_str = input("Type \"start\" to begin simulation or type \"exit\" to exit : ")
+            if start_str == "start":
+                game_loop=True
+                break
+            elif start_str == "exit":
+                return
+            else:
+                print("Try again\n")
+    else:
+        game_loop=True
             
 #GAME LOOP START---------------------------------------------------------------------------------------------
     inning=0
@@ -134,39 +167,47 @@ def startGame(teamA, teamB):
 
         if check_end(inning):
             if home_score.runs>away_score.runs:
-                print("FINAL - " + teamA.name + " WINS!")
+                if PRINT:
+                    print("FINAL - " + teamA.name + " WINS!")
                 winner=teamA.name
             else:
-                print("FINAL - " + teamB.name + " WINS!")
+                if PRINT:
+                    print("FINAL - " + teamB.name + " WINS!")
                 winner=teamB.name
-            print_display()
+            if PRINT:
+                print_display()
             break
 
         if inning == 9.5:
-            print("#\n#\n#\n START OF EXTRAS \n#\n#\n#")
+            #print("#\n#\n#\n START OF EXTRAS \n#\n#\n#")
             EXTRA_INNINGS=True #includes bottom nine for sake of home team walk offs
             EXTRAS_COUNTER+=0.5
 
         if inning==0:
-            print(teamA.str())
-            print(teamB.str())
-            print("Play ball! Poggers")
+            if PRINT:
+                print(teamA.str())
+                print(teamB.str())
+                print("Play ball! Poggers")
             inning+=1
-            #time.sleep(1) # COMMENT OUT TO REMOVE THE BREAKS BETWEEN PITCHES
+            time.sleep(GAME_SPEED) #DELAY
         
         if inning % 1 == 0:
-            print(f"Top of the {get_suffix(int(inning))} inning\n----------------------------------------")
+            if PRINT:
+                print(f"Top of the {get_suffix(int(inning))} inning\n----------------------------------------")
             sim_half_inning(teamA, teamB, away_score,home_box,away_box)
-            print_display()
-            inning_state.print()
-            bases.print()
+            if PRINT:
+                print_display()
+                inning_state.print()
+                bases.print()
             inning+=0.5
         else: 
-            print(f"Bottom of the {get_suffix(int(inning))} inning\n----------------------------------------")
+            if PRINT:
+                print(f"Bottom of the {get_suffix(int(inning))} inning\n----------------------------------------")
             sim_half_inning(teamB,teamA, home_score, home_box, away_box)
-            print_display()
-            inning_state.print()
-            bases.print()
+            if PRINT:
+                print_display()
+                inning_state.print()
+                bases.print()
             inning+=0.5
 
     game_loop=False
@@ -193,28 +234,35 @@ def sim_half_inning(pitching, batting, score, home_box, away_box): #returns outc
     while inning_state.outs < 3:
         bases.print()
         next_up=batting.next_spot()
-        print("Now batting : " + batting.lineup[next_up].name)
-        #input("Press ENTER to continue inning")   #COMMENT THIS OUT TO REMOVE PAUSE BETWEEN HALF INNINGS
+        if PRINT:
+            print("Now batting : " + batting.lineup[next_up].name)
+
+        if GAME_SPEED != 0:
+            input("Press ENTER to continue inning") #stop action if not sim speed
+
         batter=batting.lineup[next_up]
         outcome = sim_AB(pitcher, batter)
         update_inning_state(pitcher,batter,outcome,score)
         inning_pitch_count+=outcome[2]
-        inning_state.print()
+        if PRINT:
+            inning_state.print()
 
         if EXTRA_INNINGS and EXTRAS_COUNTER % 1 == 0: #if in extras and bottom of inning
             if home_score.runs>away_score.runs:
                 walkoff=True
                 break
-
-    home_box.print()
-    away_box.print()
+    if PRINT:
+        home_box.print()
+        away_box.print()
     pitcher.add_fatigue(inning_pitch_count)
     bases.flush()
     inning_state.flush()
     if walkoff:
-        print("WALKOFF!!!")
+        if PRINT:
+            print("WALKOFF!!!")
     else:
-        print("inning over!")
+        if PRINT:
+            print("inning over!")
 
 
 #returns outcome of AB as tuple (outcome, advance_fact)
@@ -227,8 +275,11 @@ def sim_AB(pitcher, batter):
     count=(0,0)           #(balls, strikes)
     AB_pitch_count=0
     while count[0] < 4 and count[1] < 3:
-        print_count(count)
-        #time.sleep(1)
+        if PRINT:
+            print_count(count)
+
+        time.sleep(GAME_SPEED) #DELAY 
+
         pitch=pitcher.make_pitch()
         action_outcome=batter.get_swing(pitch) #returns a string which is a key in outcomes_dict
         AB_pitch_count+=1
@@ -252,14 +303,17 @@ def sim_AB(pitcher, batter):
                 return("hit", 4,AB_pitch_count)
             
     if count[0]==4:
-        print_count(count)
+        if PRINT:
+            print_count(count)
+            print("Walk")
+
         batter.update_log("BB", 1)
-        print("Walk")
         
         return ("walk",1,AB_pitch_count)
     elif count[1]==3:
-        print_count(count)
-        print("Strikeout")
+        if PRINT:
+            print_count(count)
+            print("Strikeout")
         pitcher.update_log("K", 1)
         pitcher.update_log("outs_made", 1)
         batter.update_log("K", 1)

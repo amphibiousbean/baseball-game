@@ -1,6 +1,10 @@
 import random
 import json
+from config import PRINT
+
+
 class Pitcher:
+
     avg_velos={
         "Four-seam Fastball" : 94.26,
         "Sinker" : 93.58,
@@ -64,7 +68,8 @@ class Pitcher:
         velo_out=self.get_velo(type_out)
         quality=self.get_quality(type_out,velo_out)
         strike=self.get_strike()
-        print(type_out + " | " + str(round(velo_out,1)))
+        if PRINT:
+            print(type_out + " | " + str(round(velo_out,1)))
         self.pitch_count+=1
         return (type_out, velo_out, quality, strike)
 
@@ -100,7 +105,8 @@ class Pitcher:
         return (self.stuff[pitch_type]/50)*0.5 #NOT FINAL EQUATION
 
     def print(self):
-        print(self.str())
+        if PRINT:
+            print(self.str())
     
     def str(self):
         r = str(self.name) +"\nK/9 : " + str(self.K_rate) + "\nBB/9 : " + str(self.BB_rate) + "\nHR/9 : " + str(self.HR_rate) + "\nH/9 : " + str(self.H_rate) + "\nControl : " + str(self.control) +"\n"

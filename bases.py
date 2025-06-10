@@ -1,4 +1,5 @@
 import collections
+from config import PRINT
 class bases:
     
     def __init__(self, runners):
@@ -37,7 +38,8 @@ class bases:
     def enqueue_hit(self, next):
         popped=self.runners.pop()
         self.runners.appendleft(next.name if next else None)
-        print(str(self.runners))
+        if PRINT:
+            print(str(self.runners))
         return popped
     
     def enqueue_walk(self, batter): #returns None if no
@@ -54,7 +56,8 @@ class bases:
             return popped
 
     def print(self):
-        print(str(self.runners))
+        if PRINT:
+            print(str(self.runners))
 
     def flush(self): #clears bases for a new inning
         self.runners=collections.deque([None]*3)

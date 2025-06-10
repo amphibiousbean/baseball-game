@@ -1,5 +1,7 @@
 import random
 import json
+from config import PRINT
+
 class Batter:
     hits=["1B", "2B", "3B", "HR"]
     avg_velos={
@@ -61,7 +63,8 @@ class Batter:
             raise ValueError(f"Given player \"{name}\" does not exist in \"{self.FILEPATH}\"")
 
     def print(self):
-        print(self.str())
+        if PRINT:
+            print(self.str())
 
     def str(self,label=True):
         txt="{:<25} {:<3} {:<3} {:<3} {:<3}"
@@ -86,10 +89,12 @@ class Batter:
             return self.swing_outcome(pitch)
         else: #no swing
             if pitch[3]:#if strike
-                print("\n")
+                if PRINT:
+                    print("\n")
                 return "strike"
             else:
-                print("\n")
+                if PRINT:
+                    print("\n")
                 return "ball"
     
     def swing_outcome(self, pitch): #returns result of a swing as a string from ["whiff", "foul", "out", "single", "double", "triple", "home run"]
@@ -108,7 +113,8 @@ class Batter:
         whiff_rand=random.random()
         whiff=vis_factor*pitch_quality*0.58
         if whiff > whiff_rand:
-            print("Whiff")
+            if PRINT:
+                print("Whiff")
             return "whiff" #returns no contact made
         
         else: #determine quality of contact, starting with determining foul ball
@@ -120,12 +126,14 @@ class Batter:
                 rand_fact=contact-contact_rand #used in con_factor calculation. always less than 1, typically low
                 return self.get_hit(pitch, contact, rand_fact)
             elif contact*1.1 > contact_rand: #if it was within 10% of the rand
-                print("Foul")
+                if PRINT:
+                    print("Foul")
                 self.total_contact+=1
                 return "foul"
             else:
                 self.update_log("AB", 1)
-                print("Out")
+                if PRINT:
+                    print("Out")
                 self.total_contact+=1
                 return "out"
 
@@ -149,19 +157,23 @@ class Batter:
         """
         if hit < 2:
             self.log_hit("1B")
-            print("Single")
+            if PRINT:
+                print("Single")
             return "single"
         elif hit < 2.9:
             self.log_hit("2B")
-            print("Double!")
+            if PRINT:
+                print("Double!")
             return "double"
         elif hit < 3:
             self.log_hit("3B")
-            print("Triple!!")
+            if PRINT:
+                print("Triple!!")
             return "triple"
         else:
             self.log_hit("HR")
-            print("HOME RUN!!!")
+            if PRINT:
+                print("HOME RUN!!!")
             return "home run" 
   
     def update_log(self, stat, num):
@@ -195,5 +207,14 @@ class Batter:
             avg_con=self.total_con_factor/self.total_contact
             ret_str += f"\navg_hit : {avg_hit} \navg_pow : {avg_pow} \navg_con : {avg_con}"
             print(ret_str)
+
+    def get_avg_factors(self):
+        ret_str=self.name
+        if self.total_contact > 100:
+            avg_hit=self.total_hit_factor/self.total_contact
+            avg_pow=self.total_pow_factor/self.total_contact
+            avg_con=self.total_con_factor/self.total_contact
+            ret_str += f"\navg_hit : {avg_hit} \navg_pow : {avg_pow} \navg_con : {avg_con}"
+        return ret_str
             
         

@@ -249,5 +249,13 @@
         "HR/9": 62,
         "H/9": 69,
         "control": 58
+    },
+    {
+        "type": "Batter",
+        "name": "Matt",
+        "con": 79,
+        "pow": 79,
+        "vis": 79,
+        "disc": 79
     }
 ]

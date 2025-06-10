@@ -15,6 +15,10 @@ class Batter:
         "Knuckle-curve" : 80.4
     }
     FILEPATH="players.json"
+    total_hit_factor=0
+    total_con_factor=0
+    total_pow_factor=0
+    total_contact=0
     #name : their name
     #pow : ability to hit for power
     #con : ability to make solid contact
@@ -47,7 +51,7 @@ class Batter:
                 "RBI" : 0,
                 "BB" : 0,
                 "K" : 0,
-                "R" : 0,
+                #"R" : 0,
                 "1B" : 0,
                 "2B" : 0,
                 "3B" : 0,
@@ -111,15 +115,18 @@ class Batter:
             contact_rand=random.random() #random from domain (0,1), determines if contact results in a hit
             con_ratio=self.con/50
             contact=con_ratio-(con_ratio*pitch_quality*0.9) #domain [con_ratio/10, con_ratio], typically lower.
+            
             if contact > contact_rand: 
                 rand_fact=contact-contact_rand #used in con_factor calculation. always less than 1, typically low
                 return self.get_hit(pitch, contact, rand_fact)
             elif contact*1.1 > contact_rand: #if it was within 10% of the rand
                 print("Foul")
+                self.total_contact+=1
                 return "foul"
             else:
                 self.update_log("AB", 1)
                 print("Out")
+                self.total_contact+=1
                 return "out"
 
 
@@ -130,10 +137,16 @@ class Batter:
         con_factor=(self.con/50)/(velo_factor*stuff_factor) # should hover around 0.9-1.1 ideally
         pow_factor=velo_factor*(self.pow/50)*pow_rand # will need extensive testing. should range from close to 0 to 2.
         hit=con_factor+pow_factor
+        self.total_con_factor+=con_factor
+        self.total_pow_factor+=pow_factor
+        self.total_hit_factor+=hit
+        self.total_contact+=1
+        """
         print(f"pow_rand : {pow_rand}")
         print(f"pow_factor : {pow_factor}")
         print(f"con_factor : {con_factor}")
         print(f"hit : {hit}")
+        """
         if hit < 2:
             self.log_hit("1B")
             print("Single")
@@ -159,7 +172,28 @@ class Batter:
         self.update_log(hit, 1)
         self.update_log("AB", 1)
 
+    def flush_log(self):
+        self.game_log={
+                "AB" : 0,
+                "H" : 0,
+                "RBI" : 0,
+                "BB" : 0,
+                "K" : 0,
+                #"R" : 0,
+                "1B" : 0,
+                "2B" : 0,
+                "3B" : 0,
+                "HR" : 0,
+                }
         
 
-        
+    def print_avg_factors(self):
+        ret_str=self.name
+        if self.total_contact > 100:
+            avg_hit=self.total_hit_factor/self.total_contact
+            avg_pow=self.total_pow_factor/self.total_contact
+            avg_con=self.total_con_factor/self.total_contact
+            ret_str += f"\navg_hit : {avg_hit} \navg_pow : {avg_pow} \navg_con : {avg_con}"
+            print(ret_str)
+            
         

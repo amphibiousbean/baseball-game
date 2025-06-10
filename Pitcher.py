@@ -48,6 +48,7 @@ class Pitcher:
             self.game_log={
                 "pitched" : False,
                 "outs_made" : 0,
+                "H" : 0,
                 "ER" : 0,
                 "BB" : 0,
                 "K" : 0,
@@ -68,6 +69,8 @@ class Pitcher:
         return (type_out, velo_out, quality, strike)
 
     def add_fatigue(self, n): #adds fatigue to pitcher based on how many pitches were thrown in their last inning
+        pass
+        '''
         self.pitch_count+=n
         pitch_count_fatigue=self.pitch_count/2500
         per_inning_fatigue=((n-15)/1000)
@@ -75,6 +78,7 @@ class Pitcher:
             self.fatigue+=per_inning_fatigue #gains energy after quick innings (less than 15 pitches), loses for longer innings
         else:
             self.fatigue+=(pitch_count_fatigue+per_inning_fatigue)
+        '''
     
     def get_strike(self):
         strike_chance = ((self.control+self.confidence)/(50-(self.confidence/2)))*0.5  #50% chance by default, adjusted based on control attribute and confidence level
@@ -114,5 +118,13 @@ class Pitcher:
         self.game_log["H"] += 1
         self.game_log["HR"] += 1
     
-
-    
+    def flush_log(self):
+         self.game_log={
+                "pitched" : False,
+                "outs_made" : 0,
+                "H" : 0,
+                "ER" : 0,
+                "BB" : 0,
+                "K" : 0,
+                "HR" : 0
+            }

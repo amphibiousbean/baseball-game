@@ -6,6 +6,7 @@ import bases as bases
 import scoreboard as scoreboard
 import time
 import random
+import os
 import collections as c
 PHI=[
     "Bryson Stott",
@@ -91,6 +92,7 @@ def test_teams(details):
 #test_bases() #tested, works!
 #test_display() #works
 
+print(os.getcwd()+"\\test_data")
 
 
 

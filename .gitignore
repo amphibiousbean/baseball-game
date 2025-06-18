@@ -1,0 +1,6 @@
+test_data/
+__pycache__
+tests.py
+stats.json
+players.json
+data_puller.py

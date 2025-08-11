@@ -36,11 +36,19 @@ class Batter:
     k=0
     tot_foul_chance=0
     foul_calcs=0
+    ooz_bbe=0 #out of zone batted ball events
+    tot_homer_prob=0
+    tot_xbh_prob=0
+    tot_hits=0
     ZONE_SWING_BASE=0.65
     OUT_ZONE_SWING_BASE=0.25
     CON_BASELINE=0.2
     CON_MAX=0.4
     FOUL_BASE=1.2
+    VIS_BASE=0.2
+    UPPER_BOUND_CONST=(1/6)
+    HOMER_CONST=0.05
+    XBH_CONST=0.05
     #name : their name
     #pow : ability to hit for power
     #con : ability to make solid contact
@@ -156,7 +164,7 @@ class Batter:
 
 
 
-    #TODO : NERF HITTING xdd
+    #TODO : tweak this so that slightly below average attribute guys aren't always hitting under the mendoza line
     def swing_outcome(self, pitch,count): #returns result of a swing as a string from ["whiff", "foul", "out", "single", "double", "triple", "home run"]
         
         contact=None
@@ -176,7 +184,7 @@ class Batter:
             contact_rand=random.random() #random from domain (0,1), determines if contact results in a hit
             #con_ratio=self.con/50
             #contact=con_ratio-(con_ratio*q*0.9) #domain [con_ratio/10, con_ratio], typically lower. #TODO : make this work right
-            contact=self.get_hit_prob(pitch, count)
+            contact=self.get_hit_prob(pitch, count) 
             foul_chance=numpy.log10((self.vis/50))
             if self.vis/50 < 1:
                 foul_chance*=0.25
@@ -208,64 +216,74 @@ class Batter:
                 self.tot_AB+=1
                 return "out"
         
-    #TODO : this thing sucks
+    #TODO : this thing sucks. TOO MANY XBH. ESPECIALLY HOME RUNS
     def get_hit(self, pitch, contact, rand_fact, count): 
+        quality=pitch[2]
         velo_factor=(pitch[1]/self.avg_velos[pitch[0]])*1.05 #(pitch velo / avg velo of that pitch type)*1.05
-        stuff_factor=(pitch[2])
-        pow_rand=random.uniform(0.1,1.5)
-        con_factor=(self.con/50)/(velo_factor*stuff_factor) # should hover around 0.9-1.1 ideally
-        pow_factor=velo_factor*(self.pow/50)*pow_rand # will need extensive testing. should range from close to 0 to 2.
-        hit=con_factor+pow_factor
-        self.total_con_factor+=con_factor
+        stuff_factor=(0.5-quality)/(2+quality) #same as in get_hit_prob()
+
+        #TODO: tweak these. more homers, less doubles. probably something to do with how pow is weighed.
+        homer_prob=1-((self.HOMER_CONST*(self.pow/50)*velo_factor)-(stuff_factor/4)) 
+        xbh_prob=0.8-((self.XBH_CONST*(self.pow/50)*velo_factor)-(stuff_factor/4))
+        pow_factor=random.random() #(0,1)
+
+        self.tot_homer_prob+=homer_prob
+        self.tot_xbh_prob+=xbh_prob
         self.total_pow_factor+=pow_factor
-        self.total_hit_factor+=hit
+        self.tot_hits+=1
         self.total_contact+=1
         self.tot_in_play+=1
         self.tot_AB+=1
-        """
-        print(f"pow_rand : {pow_rand}")
-        print(f"pow_factor : {pow_factor}")
-        print(f"con_factor : {con_factor}")
-        print(f"hit : {hit}")
-        """
-        if hit < 2:
-            self.log_hit("1B")
+
+        #if high enough to be a home run
+        if pow_factor>=homer_prob:
+            self.log_hit("HR")
             if PRINT:
-                print("Single")
-            return "single"
-        elif hit < 2.9:
+                print("HOME RUN!!!")
+            return "home run"
+        
+        #if xbh TODO: incorporate player speed to get chances of a triple. until then triples are not possible
+        elif pow_factor>=xbh_prob:
             self.log_hit("2B")
             if PRINT:
                 print("Double!")
             return "double"
-        elif hit < 3:
-            self.log_hit("3B")
-            if PRINT:
-                print("Triple!!")
-            return "triple"
+        
+        #if neither home run or xbh then it is a single
         else:
-            self.log_hit("HR")
+            self.log_hit("1B")
             if PRINT:
-                print("HOME RUN!!!")
-            return "home run" 
-  
-    def get_hit_prob(self, pitch, count):
+                print("Single")
+            return "single"
+    
+    '''
+    returns the "xBA" of the batted ball. 
+    This is a random number from range (low_bound, upper_bound). 
+    As contact attribute increases so do the bounds. 
+    Impacted by ball/strike and pitch quality
+    '''
+    def get_hit_prob(self, pitch, count): 
         q=pitch[2] #quality
         strike=pitch[3] #strike=True, ball=False
-        con_impact=(((self.CON_MAX-self.CON_BASELINE)/60)*self.con)+self.CON_BASELINE
-        self.tot_con_impact+=con_impact
-        quality_impact=1-(math.cos((math.pi/2) * (q-0.5))) #1-cos(pi/2 * x-0.5)
-        if q < 0.5:
-            quality_impact*=-1 #inverse for when a pitch is below average quality
-
-        #quality_impact=(7/4)*(q-0.5)**3
-        ball_strike_impact=(0.1875/60)*(self.vis-20)
+        con_impact_lower=(self.con/50)/25 
+        
+        quality_impact=(0.5-q)/(2+q)
+        ball_strike_impact=0
         if not strike:
-            ball_strike_impact-=0.25
-        self.tot_ball_strike_impact+=ball_strike_impact
+            ball_strike_impact=(((self.vis/50))/10)-self.VIS_BASE
+            self.tot_ball_strike_impact+=ball_strike_impact
+            self.ooz_bbe+=1
+
         self.tot_quality_impact+=quality_impact
         self.hit_calcs+=1
-        return con_impact+ball_strike_impact-quality_impact
+
+        
+        con_impact_upper=((self.con/50)/3)+self.UPPER_BOUND_CONST+quality_impact+ball_strike_impact
+
+        con_impact=random.uniform(con_impact_lower, con_impact_upper) #essentially the raw "xBA" of the hit.
+        self.tot_con_impact+=con_impact
+        self.hit_calcs+=1
+        return con_impact
           
 
     def get_whiff(self,pitch):
@@ -356,7 +374,7 @@ class Batter:
         avg_pow=0
         if self.total_contact > 1:
             avg_hit=self.total_hit_factor/self.total_contact
-            avg_pow=self.total_pow_factor/self.total_contact
+            avg_pow=self.total_pow_factor/self.tot_hits
             avg_con=self.total_con_factor/self.total_contact
             
         return (avg_hit, avg_pow, avg_con)
@@ -381,7 +399,7 @@ class Batter:
         return self.tot_con_impact/self.hit_calcs
     
     def get_avg_b_s_imp(self):
-        return self.tot_ball_strike_impact/self.hit_calcs
+        return self.tot_ball_strike_impact/self.ooz_bbe
     
     def get_avg_q_imp(self):
         return self.tot_quality_impact/self.hit_calcs
@@ -410,3 +428,9 @@ class Batter:
     
     def avg_foul_chance(self):
         return self.tot_foul_chance/self.foul_calcs
+    
+    def get_avg_hr_prob(self):
+        return self.tot_homer_prob/self.tot_hits
+    
+    def get_avg_xbh_prob(self):
+        return self.tot_xbh_prob/self.tot_hits

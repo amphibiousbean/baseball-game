@@ -257,5 +257,13 @@
         "pow": 79,
         "vis": 79,
         "disc": 79
+    },
+    {
+        "type": "Batter",
+        "name": "Harrison Bader",
+        "con": 41,
+        "pow": 47,
+        "vis": 43,
+        "disc": 46
     }
 ]

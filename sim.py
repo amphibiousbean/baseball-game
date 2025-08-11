@@ -42,7 +42,7 @@ PHI=[
     "J.T. Realmuto",
     "Max Kepler",
     "Alec Bohm",
-    "Johan Rojas"
+    "Harrison Bader"
 ]
 BOS=[
     "Jarren Duran",
@@ -410,6 +410,8 @@ def save_batter_to_df(home_team, away_team):
     fouls=[]
     k_rate=[]
     foul_chance=[]
+    hr_prob=[]
+    xbh_prob=[]
 
     for batter in home_team.lineup:
         names.append(batter.name) 
@@ -434,6 +436,8 @@ def save_batter_to_df(home_team, away_team):
         fouls.append(batter.get_foul_rate())
         k_rate.append(batter.get_k_rate())
         foul_chance.append(batter.avg_foul_chance())
+        hr_prob.append(batter.get_avg_hr_prob())
+        xbh_prob.append(batter.get_avg_xbh_prob())
 
     for batter in away_team.lineup:
         names.append(batter.name) 
@@ -458,24 +462,28 @@ def save_batter_to_df(home_team, away_team):
         fouls.append(batter.get_foul_rate())
         k_rate.append(batter.get_k_rate())
         foul_chance.append(batter.avg_foul_chance())
+        hr_prob.append(batter.get_avg_hr_prob())
+        xbh_prob.append(batter.get_avg_xbh_prob())
     
     dict={
         "name" : names, 
         #"hit_fact" : hit_fact, 
-        #"pow_fact" : pow_fact, 
+        "pow_fact" : pow_fact, 
+        "hr_prob" : hr_prob,
+        "xbh_prob" : xbh_prob,
         #"con_fact" : con_fact, 
         #"swing_rate" : swing,
         #"chase_rate" : chase,
-        #"whiff_rate" : whiff,
-        #"looking_strike" : looking,
+        "whiff_rate" : whiff,
+        "looking_strike" : looking,
         "con_att" : con, 
         #"pow_att" : pow,
         #"vis_att" : vis,
         #"disc_att" : disc,
         "in_play" : in_play,
-        "con_impact" : con_impact,
-        "qual_impact" : q_impact,
-        "ball_strike_impact" : b_s_impact,
+        #"con_impact" : con_impact,
+        #"qual_impact" : q_impact,
+        #"ball_strike_impact" : b_s_impact,
         #"swing_prob" : swing_prob,
         #"chase_prob" : chase_prob,
         "foul_rate" : fouls,

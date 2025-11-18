@@ -1,9 +1,9 @@
-import Pitcher as Pitcher
-import Batter as Batter
-import Team as Team
+import backend.app.models.Pitcher as Pitcher
+import backend.app.models.Batter as Batter
+import backend.app.models.Team as Team
 # import display as display
-import bases as bases
-import scoreboard as scoreboard
+import backend.app.sim.bases as bases
+import backend.app.sim.scoreboard as scoreboard
 import time
 import random
 import os
@@ -93,6 +93,7 @@ def test_teams(details):
 #test_display() #works
 
 print(os.getcwd()+"\\test_data")
+test_teams(True)
 
 
 

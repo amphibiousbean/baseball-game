@@ -1,0 +1,43 @@
+{
+    "Red Sox" : {
+        "pitchers" : [
+            "Garrett Crochet",
+            "Brayan Bello",
+            "Lucas Giolito",
+            "Walker Buehler",
+            "Hunter Dobbins"
+
+        ],
+        "batters" :[
+            "Jarren Duran",
+            "Rafael Devers",
+            "Wilyer Abreu",
+            "Romy Gonzalez",
+            "Alex Bregman",
+            "Trevor Story",
+            "Ceddanne Rafaela",
+            "Connor Wong",
+            "Kristian Campbell"
+        ]
+    },
+    "Phillies" :{
+        "pitchers" : [
+            "Zack Wheeler",
+            "Cristopher S\u00e1nchez",
+            "Ranger Su\u00e1rez",
+            "Aaron Nola",
+            "Jes\u00fas Luzardo"
+        ],
+        "batters" : [
+            "Trea Turner",
+            "Kyle Schwarber",
+            "Bryce Harper",
+            "Alec Bohm",
+            "Brandon Marsh",
+            "J.T. Realmuto",
+            "Harrison Bader",
+            "Max Kepler",
+            "Bryson Stott"
+        ]
+    }
+}

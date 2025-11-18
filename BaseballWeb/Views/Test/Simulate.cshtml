@@ -1,0 +1,124 @@
+@model List<Game>
+<style>
+    table{ 
+        width:100%
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    th,td{
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th
+        background-color: #f2f2f2;
+    }
+    .team-name {
+        font-weight: bold;
+    }
+
+</style>
+<h2>Simulation Results</h2>
+
+@foreach (var game in Model)
+{
+    <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+        <h3>Game @game.GameId: @game.Home vs. @game.Away</h3>
+        <p>@game.Home : @game.HomeScore.Runs, @game.Away : @game.AwayScore.Runs</p>
+        
+        <h4>Box Score</h4>
+        <table>
+            <thead>
+                <tr>
+                    <td>Team</td>
+                    @for (int i=1; i<=game.AwayScore.ByInningRuns.Count;i++)
+                    {
+                        <td>@i</td>
+                    }
+                    <td>R</td>
+                    <td>H</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="team-name">@game.Away</td>
+                    @foreach (var runs in game.AwayScore.ByInningRuns)
+                    {
+                        <td>@runs</td>
+                    }
+                    <td>@game.AwayScore.Runs</td>
+                    <td>@game.AwayScore.Hits</td>
+                </tr>
+                <tr>
+                    <td class="team-name">@game.Home</td>
+                    @foreach (var runs in game.HomeScore.ByInningRuns)
+                    {
+                        <td>@runs</td>
+                    }
+                    @if (game.HomeScore.ByInningRuns.Count<game.AwayScore.ByInningRuns.Count){
+                        @for(int i = game.HomeScore.ByInningRuns.Count; i<game.AwayScore.ByInningRuns.Count;i++){
+                            <td>X</td>
+                        }
+                    }
+                    <td>@game.HomeScore.Runs</td>
+                    <td>@game.HomeScore.Hits</td>
+                </tr>
+            </tbody>
+        </table>
+        <h4>@game.Away</h4>
+        <table>
+            <thead>
+                <tr>
+                    <td>Name</td>
+                    <td>AB</td>
+                    <td>H</td>
+                    <td>RBI</td>
+                    <td>BB</td>
+                    <td>K</td>
+                </tr>
+            </thead>
+            <tbody>
+            
+            @foreach (var hitter in game.AwayBox.Hitters)
+            {
+                <tr>
+                    <td>@hitter.Key</td>
+                    <td>@hitter.Value.AB</td>
+                    <td>@hitter.Value.H</td>
+                    <td>@hitter.Value.RBI</td>
+                    <td>@hitter.Value.BB</td>
+                    <td>@hitter.Value.K</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        <h4>@game.Home</h4>
+        <table>
+            <thead>
+                <tr>
+                    <td>Name</td>
+                    <td>AB</td>
+                    <td>H</td>
+                    <td>RBI</td>
+                    <td>BB</td>
+                    <td>K</td>
+                </tr>
+            </thead>
+            <tbody>
+            
+            @foreach (var hitter in game.HomeBox.Hitters)
+            {
+                <tr>
+                    <td>@hitter.Key</td>
+                    <td>@hitter.Value.AB</td>
+                    <td>@hitter.Value.H</td>
+                    <td>@hitter.Value.RBI</td>
+                    <td>@hitter.Value.BB</td>
+                    <td>@hitter.Value.K</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

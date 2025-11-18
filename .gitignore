@@ -4,3 +4,12 @@ tests.py
 stats.json
 players.json
 data_puller.py
+venv/
+bin/
+obj/
+vs/
+*.user
+*.suo
+*.cache
+*.pdb
+*.ide
